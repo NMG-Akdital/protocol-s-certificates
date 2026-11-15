@@ -1,0 +1,27 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Instructors{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Instructors</h1><div class="muted">"Show on public page" controls whether the instructor's name appears on verification pages.</div></div></div>
+{% if can('issuer') %}
+<form method="post" action="/admin/instructors/save" enctype="multipart/form-data" class="card" style="max-width:900px">
+  <h2>{{ 'Edit ' ~ edit.full_name if edit else 'Add an instructor' }}</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="iid" value="{{ edit.id if edit else '' }}">
+  <div class="cols">
+    <div class="field"><label for="fn">Full name</label><input id="fn" type="text" name="full_name" required maxlength="120" value="{{ edit.full_name if edit else '' }}"></div>
+    <div class="field"><label for="tt">Title (internal)</label><input id="tt" type="text" name="title" maxlength="200" value="{{ edit.title if edit else 'Instructor / Trainer' }}"></div>
+    <div class="field"><label for="sg">Signature image (PNG/JPG, optional)</label><input id="sg" type="file" name="signature" accept="image/png,image/jpeg"><div class="hint">Printed above the instructor's signature line. Use a transparent PNG.</div></div>
+  </div>
+  <label class="check"><input type="checkbox" name="show_publicly" {{ 'checked' if not edit or edit.show_publicly }}> Show this instructor's name on public verification pages</label>
+  {% if edit %}<label class="check"><input type="checkbox" name="is_active" {{ 'checked' if edit.is_active }}> Active</label>
+  {% if edit.signature_file %}<label class="check"><input type="checkbox" name="remove_signature"> Remove saved signature image</label>{% endif %}{% endif %}
+  <div class="actions" style="margin-top:14px"><button class="btn" type="submit">{{ 'Save changes' if edit else 'Add instructor' }}</button>{% if edit %}<a class="btn secondary" href="/admin/instructors">Cancel</a>{% endif %}</div>
+</form>
+{% endif %}
+<div class="tablebox"><table>
+  <tr><th>Name</th><th>Public</th><th>Signature</th><th>Status</th><th></th></tr>
+  {% for i in rows %}<tr><td>{{ i.full_name }}</td><td>{{ 'Yes' if i.show_publicly else 'No' }}</td><td>{{ 'Uploaded' if i.signature_file else '—' }}</td><td>{{ 'Active' if i.is_active else 'Inactive' }}</td>
+    <td>{% if can('issuer') %}<a class="btn secondary small" href="/admin/instructors/{{ i.id }}">Edit</a>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No instructors yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

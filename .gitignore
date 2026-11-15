@@ -1,0 +1,6 @@
+.env
+data/
+acceptance-evidence/
+__pycache__/
+*.pyc
+.pytest_cache/

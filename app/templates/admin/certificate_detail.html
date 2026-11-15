@@ -1,0 +1,83 @@
+{% extends "admin/_layout.html" %}
+{% block title %}{{ c.certificate_no or 'Draft' }}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div>
+    <div class="small muted" style="letter-spacing:.14em;text-transform:uppercase">Certificate</div>
+    <h1 class="mono">{{ c.certificate_no or 'Draft #' ~ c.id }} <span class="badge b-{{ c.status }}" style="vertical-align:middle">{{ c.status }}</span>{% if expired and c.status == 'issued' %} <span class="badge b-expired" style="vertical-align:middle">expired</span>{% endif %}</h1>
+    <div class="muted">{{ c.participant_name }} · {{ c.course_title }}</div>
+  </div>
+  <div class="actions">
+    <a class="btn secondary" href="/admin/certificates/{{ c.id }}/pdf" target="_blank" rel="noopener">{{ 'View PDF' if c.certificate_no else 'Preview PDF' }}</a>
+    {% if c.certificate_no %}<a class="btn" href="/admin/certificates/{{ c.id }}/pdf?download=1">Download PDF</a>{% endif %}
+  </div>
+</div>
+
+{% if c.status == 'draft' %}
+<div class="card">
+  <h2>Draft — not yet issued</h2>
+  <p class="muted" style="margin-top:0">The preview is watermarked and has no QR code. Issuing assigns the next certificate ID, generates the QR code from its verification link, and locks the details.</p>
+  {% if can('issuer') %}<div class="actions">
+    <form method="post" action="/admin/certificates/{{ c.id }}/issue" class="inline" data-confirm="Issue this certificate? The details will be locked."><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn" type="submit">Issue certificate</button></form>
+    <a class="btn secondary" href="/admin/certificates/{{ c.id }}/edit">Edit draft</a>
+    <form method="post" action="/admin/certificates/{{ c.id }}/delete" class="inline" data-confirm="Delete this draft?"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn secondary" type="submit">Delete draft</button></form>
+  </div>{% endif %}
+</div>
+{% endif %}
+
+<div class="cols" style="gap:18px">
+<div class="card">
+  <h2>Printed details</h2>
+  <dl class="kv">
+    <dt>Participant</dt><dd><a href="/admin/participants/{{ c.participant_id }}">{{ c.participant_name }}</a></dd>
+    <dt>Course</dt><dd>{{ c.course_title }}</dd>
+    <dt>Course code</dt><dd>{{ c.course_code }}</dd>
+    <dt>Duration</dt><dd>{{ c.duration_hours|hours }} hours</dd>
+    <dt>Training dates</dt><dd>{{ daterange(c.start_date, c.completion_date) }}</dd>
+    <dt>Issue date</dt><dd>{{ c.issue_date|longdate or '—' }}</dd>
+    <dt>Valid until</dt><dd>{{ c.expiry_date|longdate if c.expiry_date else 'Does not expire' }}</dd>
+    <dt>Accreditations</dt><dd>{% for a in accs %}{{ a.body }} — {{ a.statement }}{% if a.ref %} (No. {{ a.ref }}){% endif %}{% if not loop.last %}<br>{% endif %}{% else %}None{% endfor %}{% if not c.certificate_no and accs %}<div class="small muted">Fixed at issuance</div>{% endif %}</dd>
+    <dt>Instructor</dt><dd>{{ c.instructor_name or '—' }} {% if c.instructor_name and not c.show_instructor_public %}<span class="small muted">(hidden on public page)</span>{% endif %}</dd>
+    {% if c.batch %}<dt>Batch</dt><dd><a href="/admin/batches/{{ c.batch_id }}">{{ c.batch.reference }}</a></dd>{% endif %}
+  </dl>
+</div>
+{% if c.certificate_no %}
+<div class="card">
+  <h2>Verification</h2>
+  <dl class="kv">
+    <dt>QR link</dt><dd class="mono small" style="overflow-wrap:anywhere"><a href="{{ verify_url }}" target="_blank" rel="noopener">{{ verify_url }}</a></dd>
+    <dt>Record signature</dt><dd>{% if sig_ok %}<span class="badge b-ok">intact</span>{% else %}<span class="badge b-error">mismatch</span>{% endif %}</dd>
+    <dt>Public PDF</dt><dd>{{ 'Allowed (QR link only)' if c.allow_public_pdf else 'Not allowed' }}
+      {% if can('admin') and c.status == 'issued' %}<form method="post" action="/admin/certificates/{{ c.id }}/public-pdf" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="enabled" value="{{ '0' if c.allow_public_pdf else '1' }}"><button class="btn secondary small" type="submit">{{ 'Disable' if c.allow_public_pdf else 'Allow' }}</button></form>{% endif %}</dd>
+    <dt>Issued</dt><dd>{{ c.issued_at|dt }}</dd>
+    {% if c.status == 'revoked' %}<dt>Revoked</dt><dd>{{ c.revoked_at|dt }}<div class="small">{{ c.revocation_reason }}</div></dd>{% endif %}
+    {% if related.replaces_id %}<dt>Replaces</dt><dd><a class="mono" href="/admin/certificates/{{ related.replaces_id.id }}">{{ related.replaces_id.certificate_no }}</a></dd>{% endif %}
+    {% if related.replaced_by_id %}<dt>Replaced by</dt><dd><a class="mono" href="/admin/certificates/{{ related.replaced_by_id.id }}">{{ related.replaced_by_id.certificate_no }}</a></dd>{% endif %}
+  </dl>
+</div>
+{% endif %}
+</div>
+
+{% if c.status == 'issued' and can('admin') %}
+<div class="card">
+  <h2>Revoke or reissue</h2>
+  <p class="muted" style="margin-top:0">Revoking is permanent: the QR code and ID will show <b>REVOKED</b> immediately, including on printed copies. To correct details, reissue instead.</p>
+  <form method="post" action="/admin/certificates/{{ c.id }}/revoke" data-confirm="Revoke {{ c.certificate_no }}? This cannot be undone." style="max-width:640px">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="field"><label for="reason">Reason for revocation (recorded)</label><input id="reason" type="text" name="reason" required minlength="5" maxlength="500" placeholder="e.g. Issued in error / participant did not complete the assessment"></div>
+    <div class="actions"><button class="btn danger" type="submit">Revoke certificate</button><a class="btn secondary" href="/admin/certificates/{{ c.id }}/reissue">Reissue with corrections…</a></div>
+  </form>
+</div>
+{% endif %}
+
+<div class="cols" style="gap:18px">
+<div class="card"><h2>History</h2>
+  <div class="tablebox"><table><tr><th>When</th><th>Action</th><th>By</th></tr>
+  {% for h in history %}<tr><td class="small">{{ h.at|dt }}</td><td>{{ h.action }}<div class="small muted" style="overflow-wrap:anywhere">{{ h.details }}</div></td><td class="small">{{ h.user_email }}</td></tr>{% endfor %}
+  </table></div></div>
+<div class="card"><h2>Recent verifications</h2>
+  {% if verifications %}<div class="tablebox"><table><tr><th>When</th><th>Result</th><th>Via</th></tr>
+  {% for v in verifications %}<tr><td class="small">{{ v.at|dt }}</td><td><span class="badge b-{{ v.result }}">{{ v.result.replace('_',' ') }}</span></td><td class="small">{{ v.via }}</td></tr>{% endfor %}
+  </table></div>{% else %}<p class="muted">Not verified yet.</p>{% endif %}</div>
+</div>
+{% endblock %}

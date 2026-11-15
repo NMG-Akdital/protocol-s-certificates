@@ -1,0 +1,25 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Participants{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>Participants</h1><div class="muted">ID numbers, phone and email are private and never appear on certificates or the public page.</div></div>
+  {% if can('issuer') %}<div class="actions"><a class="btn" href="/admin/participants/new">Add participant</a></div>{% endif %}
+</div>
+{% if can('issuer') %}
+<details class="box"><summary>Import participants from Excel / CSV</summary>
+  <form method="post" action="/admin/participants/import" enctype="multipart/form-data" style="margin-top:12px">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <p class="small muted" style="margin-top:0">Columns: <b>Participant Name</b> (required), National ID, Company, Email, Phone. Existing participants with the same name (and ID) are skipped. To issue certificates in bulk, use <a href="/admin/import">Bulk import</a> instead.</p>
+    <div class="actions"><input type="file" name="file" accept=".csv,.xlsx" required><button class="btn secondary" type="submit">Import</button></div>
+  </form>
+</details>
+{% endif %}
+<form class="toolbar" method="get"><input type="search" name="q" value="{{ q }}" placeholder="Name, ID number or company" aria-label="Search participants"><button class="btn secondary" type="submit">Search</button></form>
+<div class="tablebox"><table>
+  <tr><th>Name</th><th>National ID</th><th>Company</th><th>Certificates</th><th></th></tr>
+  {% for p in rows %}
+  <tr><td><a href="/admin/participants/{{ p.id }}">{{ p.full_name }}</a></td><td class="mono small">{{ p.national_id or '' }}</td><td>{{ p.company or '' }}</td><td>{{ counts.get(p.id, 0) }}</td>
+      <td>{% if can('issuer') %}<a class="btn secondary small" href="/admin/certificates/new?participant_id={{ p.id }}">New certificate</a>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No participants found.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

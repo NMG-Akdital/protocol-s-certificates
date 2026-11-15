@@ -1,0 +1,23 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Users</h1><div class="muted"><b>admin</b>: everything, incl. revoke, reissue, users and settings · <b>issuer</b>: create and issue certificates, imports, batches · <b>viewer</b>: read-only</div></div></div>
+<form method="post" action="/admin/users" class="card" style="max-width:980px">
+  <h2>Add a user</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="cols">
+    <div class="field"><label for="em">Email</label><input id="em" type="email" name="email" required></div>
+    <div class="field"><label for="fn">Full name</label><input id="fn" type="text" name="full_name" required maxlength="200"></div>
+    <div class="field"><label for="rl">Role</label><select id="rl" name="role">{% for r in roles %}<option value="{{ r }}" {{ 'selected' if r == 'issuer' }}>{{ r }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="pw">Temporary password</label><input id="pw" type="password" name="password" required autocomplete="new-password"><div class="hint">12+ characters, upper and lower case, and a number.</div></div>
+  </div>
+  <button class="btn" type="submit">Create user</button>
+</form>
+<div class="tablebox"><table><tr><th>User</th><th>Role</th><th>Status</th><th>Last sign-in</th><th>Actions</th></tr>
+{% for u in rows %}<tr><td>{{ u.full_name }}<div class="small muted">{{ u.email }}</div></td><td>{{ u.role }}</td><td>{{ 'Active' if u.is_active else 'Disabled' }}</td><td class="small">{{ u.last_login_at|dt }}</td>
+<td>{% if u.id != user.id %}
+  <form method="post" action="/admin/users/{{ u.id }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="action" value="role"><select name="role" aria-label="Role" style="width:auto;min-height:32px;padding:4px 8px">{% for r in roles %}<option value="{{ r }}" {{ 'selected' if r == u.role }}>{{ r }}</option>{% endfor %}</select> <button class="btn secondary small" type="submit">Set role</button></form>
+  <form method="post" action="/admin/users/{{ u.id }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="action" value="toggle"><button class="btn secondary small" type="submit">{{ 'Disable' if u.is_active else 'Enable' }}</button></form>
+  <form method="post" action="/admin/users/{{ u.id }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="action" value="password"><input type="password" name="password" placeholder="New password" aria-label="New password" autocomplete="new-password" style="width:160px;min-height:32px;padding:4px 8px"> <button class="btn secondary small" type="submit">Reset</button></form>
+{% else %}<span class="small muted">You</span>{% endif %}</td></tr>{% endfor %}</table></div>
+{% endblock %}

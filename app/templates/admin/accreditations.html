@@ -1,0 +1,50 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Accreditations{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Accreditations &amp; approvals</h1>
+  <div class="muted">Logos of awarding bodies that have approved Protocol S. Each one prints only on certificates for the courses it covers, together with its approval number, and is shown on the verification page.</div></div></div>
+
+<div class="card" style="border-left:4px solid #B08D57">
+  <b>Before adding an approval</b>
+  <ul class="small" style="margin:8px 0 0;padding-left:18px;line-height:1.7">
+    <li>Use the <b>official logo file</b> and the <b>exact wording</b> from your approval letter or the body's brand guidelines (for example, the approved-provider mark).</li>
+    <li>Select <b>only the courses the approval covers</b>. Approvals are usually course-specific, so most of your in-house courses should not carry the logo.</li>
+    <li>Set the approval's <b>expiry date</b>, and the logo stops printing automatically after it. Certificates already issued keep what they were issued with.</li>
+  </ul>
+</div>
+
+<form method="post" action="/admin/accreditations" enctype="multipart/form-data" class="card" style="max-width:980px">
+  <h2>{{ 'Edit ' ~ edit.body_name if edit else 'Add an approval' }}</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="aid" value="{{ edit.id if edit else '' }}">
+  <div class="cols">
+    <div class="field"><label for="b">Awarding / approving body</label><input id="b" type="text" name="body_name" required maxlength="120" value="{{ edit.body_name if edit else '' }}" placeholder="e.g. IOSH"></div>
+    <div class="field"><label for="st">Approval wording (printed under the logo)</label><input id="st" type="text" name="statement" required maxlength="200" value="{{ edit.statement if edit else '' }}" placeholder="e.g. Approved Training Provider"></div>
+    <div class="field"><label for="r">Approval / provider number</label><input id="r" type="text" name="reference_no" maxlength="80" value="{{ edit.reference_no if edit else '' }}"></div>
+    <div class="field"><label for="vu">Approval valid until (optional)</label><input id="vu" type="date" name="valid_until" value="{{ edit.valid_until.isoformat() if edit and edit.valid_until else '' }}"></div>
+    <div class="field"><label for="lg">Official logo (PNG or JPG)</label><input id="lg" type="file" name="logo" accept="image/png,image/jpeg" {{ '' if edit else 'required' }}><div class="hint">A transparent PNG at least 600 px wide prints best.{% if edit %} Leave empty to keep the current logo.{% endif %}</div></div>
+  </div>
+  <div class="field"><label>Courses covered</label>
+    <label class="check"><input type="radio" name="scope" value="selected" {{ 'checked' if not edit or not edit.applies_to_all }}> Only the courses selected below</label>
+    <label class="check"><input type="radio" name="scope" value="all" {{ 'checked' if edit and edit.applies_to_all }}> All courses (only if the approval covers the whole center)</label>
+    <div style="columns:2 260px;margin-top:8px">
+      {% set sel = edit.courses|map(attribute='id')|list if edit else [] %}
+      {% for c in courses %}<label class="check" style="break-inside:avoid"><input type="checkbox" name="course_ids" value="{{ c.id }}" {{ 'checked' if c.id in sel }}> <span><span class="mono small">{{ c.code }}</span> {{ c.title }}</span></label>{% endfor %}
+    </div>
+  </div>
+  {% if edit %}<label class="check"><input type="checkbox" name="is_active" {{ 'checked' if edit.is_active }}> Active</label>{% endif %}
+  <label class="check" style="margin-top:8px"><input type="checkbox" name="confirm_held" required> I confirm the center currently holds this approval for the selected courses and may use this logo.</label>
+  <div style="margin-top:16px"><button class="btn" type="submit">{{ 'Save changes' if edit else 'Add approval' }}</button></div>
+</form>
+
+<div class="tablebox"><table>
+  <tr><th>Logo</th><th>Body</th><th>Wording · No.</th><th>Courses</th><th>Valid until</th><th>Status</th><th></th></tr>
+  {% for a in rows %}<tr>
+    <td><img src="/admin/uploads/{{ a.logo_file }}" alt="" style="max-height:40px;max-width:110px"></td>
+    <td>{{ a.body_name }}</td><td>{{ a.statement }}{% if a.reference_no %}<div class="small muted">No. {{ a.reference_no }}</div>{% endif %}</td>
+    <td class="small">{% if a.applies_to_all %}All courses{% else %}{{ a.courses|map(attribute='code')|join(', ') }}{% endif %}</td>
+    <td>{{ a.valid_until|dt or '—' }}</td><td>{{ 'Active' if a.is_active else 'Inactive' }}</td>
+    <td><a class="btn secondary small" href="/admin/accreditations?edit={{ a.id }}">Edit</a></td></tr>
+  {% else %}<tr><td colspan="7" class="muted">No approvals added. Certificates show no accreditation logos.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

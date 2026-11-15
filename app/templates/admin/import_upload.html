@@ -1,0 +1,17 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Bulk import{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Bulk certificate generation</h1><div class="muted">Upload an Excel (.xlsx) or CSV file. You'll see a validation report and a sample certificate before anything is issued.</div></div>
+  <div class="actions"><a class="btn secondary" href="/admin/import/template.csv">Download CSV template</a></div></div>
+<form method="post" action="/admin/import" enctype="multipart/form-data" class="card" style="max-width:900px">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <h2>1 · Upload file</h2>
+  <p class="small" style="margin-top:0">Required columns: <b>Participant Name, Course Title, Course Code, Duration, Start Date, Completion Date</b>. Optional: Instructor Name, Expiry Date (or Validity Months), National ID (private), Company (private). Without an expiry column, the course's validity period is used.<br>
+  Dates: YYYY-MM-DD or DD/MM/YYYY (day first). Duration: a number of hours, e.g. <span class="mono">8</span> or <span class="mono">8 Hours</span>. Max {{ settings.max_import_rows }} rows, {{ settings.max_upload_mb }} MB.</p>
+  <div class="actions"><input type="file" name="file" accept=".csv,.xlsx" required aria-label="Import file"><button class="btn" type="submit">Validate file</button></div>
+</form>
+<h2>Recent imports</h2>
+<div class="tablebox"><table><tr><th>#</th><th>File</th><th>Uploaded</th><th>Status</th><th>Certificates</th></tr>
+{% for j in jobs %}<tr><td><a href="/admin/import/{{ j.id }}">{{ j.id }}</a></td><td>{{ j.filename }}</td><td class="small">{{ j.created_at|dt }}</td><td><span class="badge b-{{ j.status }}">{{ j.status }}</span></td><td>{{ j.total if j.status in ('completed','processing','failed') else '' }}</td></tr>
+{% else %}<tr><td colspan="5" class="muted">No imports yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

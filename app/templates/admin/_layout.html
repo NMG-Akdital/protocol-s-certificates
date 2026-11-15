@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{% block title %}Admin{% endblock %} · Protocol S Certificates</title>
+<link rel="stylesheet" href="/static/css/app.css">
+<link rel="icon" href="/static/brand/logo-mark.svg">
+</head>
+<body>
+{% set path = request.url.path %}
+<div class="shell">
+  <nav class="side" aria-label="Main">
+    <a class="brand" href="/admin"><img src="/static/brand/logo-mark.svg" alt=""><div><b>PROTOCOL S</b><span>CERTIFICATES</span></div></a>
+    <a class="nav {{ 'on' if path == '/admin' }}" href="/admin">Dashboard</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/certificates') }}" href="/admin/certificates">Certificates</a>
+    {% if can('issuer') %}<a class="nav {{ 'on' if path.startswith('/admin/import') }}" href="/admin/import">Bulk import</a>{% endif %}
+    <a class="nav {{ 'on' if path.startswith('/admin/batches') }}" href="/admin/batches">Training batches</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/participants') }}" href="/admin/participants">Participants</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/courses') }}" href="/admin/courses">Courses</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/instructors') }}" href="/admin/instructors">Instructors</a>
+    <div class="sep"></div>
+    <a class="nav {{ 'on' if path.startswith('/admin/verifications') }}" href="/admin/verifications">Verification log</a>
+    {% if can('admin') %}
+    <a class="nav {{ 'on' if path.startswith('/admin/audit') }}" href="/admin/audit">Audit log</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/users') }}" href="/admin/users">Users</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/accreditations') }}" href="/admin/accreditations">Accreditations</a>
+    <a class="nav {{ 'on' if path.startswith('/admin/settings') }}" href="/admin/settings">Settings</a>
+    {% endif %}
+    <a class="nav" href="/verify" target="_blank" rel="noopener">Public verification page ↗</a>
+    <div class="me">{{ user.full_name }} · {{ user.role }}<br>
+      <a href="/admin/account" style="color:#fff">Account</a> ·
+      <form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button type="submit">Sign out</button></form>
+    </div>
+  </nav>
+  <main class="main">
+    {% for f in flashes %}<div class="flash {{ 'err' if f.k == 'err' }}" role="status">{{ f.m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="/static/js/admin.js"></script>
+</body>
+</html>

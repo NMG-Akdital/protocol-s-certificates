@@ -1,0 +1,28 @@
+# Production on a single server (VPS): the app + Caddy (automatic HTTPS certificates).
+# 1. Point your domain's DNS A record (e.g. verify.yourdomain.com) to the server.
+# 2. cp .env.example .env  and fill in the values.
+# 3. docker compose up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - ./data:/data          # database, archived PDFs, uploads, exports — back this folder up
+    expose: ["8000"]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [app]
+
+volumes:
+  caddy_data:

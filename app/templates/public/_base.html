@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>{% block title %}Certificate verification{% endblock %} · {{ s.center_name }}</title>
+<link rel="stylesheet" href="/static/css/app.css">
+<link rel="icon" href="/static/brand/logo-mark.svg">
+</head>
+<body>
+<div class="pub">
+  <header><div class="wrap">
+    <img src="/static/brand/logo-mark.svg" alt="">
+    <div><b>{{ s.brand_name }}</b><span>{{ s.brand_descriptor }}</span></div>
+  </div></header>
+  <main><div class="wrap">{% block content %}{% endblock %}</div></main>
+  <footer><div class="wrap">Official certificate verification service of {{ s.center_name }}. This page shows the current status of a certificate as recorded in the issuing center's database.{% if s.contact_line %} · {{ s.contact_line }}{% endif %}</div></footer>
+</div>
+</body>
+</html>

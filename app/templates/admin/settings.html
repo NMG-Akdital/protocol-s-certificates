@@ -1,0 +1,28 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Settings</h1><div class="muted">Verification address: <span class="mono">{{ settings.public_base_url }}</span> (set by the PUBLIC_BASE_URL environment variable)</div></div>
+  <div class="actions"><a class="btn secondary" href="/admin/settings/preview.pdf" target="_blank" rel="noopener">Preview sample certificate</a></div></div>
+<form method="post" action="/admin/settings" enctype="multipart/form-data" class="card" style="max-width:980px">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <h2>Training center</h2>
+  <div class="cols">
+    <div class="field"><label for="cn">Center name (printed in the certificate statement)</label><input id="cn" type="text" name="center_name" value="{{ s.center_name }}" maxlength="200"></div>
+    <div class="field"><label for="bn">Brand name (logo text)</label><input id="bn" type="text" name="brand_name" value="{{ s.brand_name }}" maxlength="60"></div>
+    <div class="field"><label for="bd">Brand descriptor</label><input id="bd" type="text" name="brand_descriptor" value="{{ s.brand_descriptor }}" maxlength="80"></div>
+    <div class="field"><label for="cl">Footer contact line (optional)</label><input id="cl" type="text" name="contact_line" value="{{ s.contact_line }}" maxlength="200" placeholder="www.example.com · info@example.com"></div>
+  </div>
+  <h2 style="margin-top:8px">Authorized signature</h2>
+  <div class="cols">
+    <div class="field"><label for="sn">Authorized representative name</label><input id="sn" type="text" name="signatory_name" value="{{ s.signatory_name }}" maxlength="120"></div>
+    <div class="field"><label for="st">Title</label><input id="st" type="text" name="signatory_title" value="{{ s.signatory_title }}" maxlength="120"></div>
+    <div class="field"><label for="sg">Signature image (PNG/JPG, optional)</label><input id="sg" type="file" name="signature" accept="image/png,image/jpeg"><div class="hint">{{ 'A signature image is saved.' if s.signatory_signature_file else 'No image: certificates leave space for a wet signature.' }}</div></div>
+  </div>
+  {% if s.signatory_signature_file %}<label class="check"><input type="checkbox" name="remove_signature"> Remove the saved signature image</label>{% endif %}
+  <h2 style="margin-top:12px">Public verification page</h2>
+  <label class="check"><input type="checkbox" name="default_allow_public_pdf" {{ 'checked' if s.default_allow_public_pdf == '1' }}> New certificates allow PDF viewing from the verification page (QR link only)</label>
+  <label class="check"><input type="checkbox" name="public_full_name_without_key" {{ 'checked' if s.public_full_name_without_key == '1' }}> Show the full participant name when someone types the ID manually (without the QR code)</label>
+  <div class="hint" style="margin-left:24px">Off by default: certificate IDs are sequential, so anyone could otherwise list every trainee's name by trying IDs in order.</div>
+  <div style="margin-top:18px"><button class="btn" type="submit">Save settings</button></div>
+</form>
+{% endblock %}

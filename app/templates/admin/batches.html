@@ -1,0 +1,25 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Training batches{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Training batches</h1><div class="muted">Register a group of participants on one course run, then issue all their certificates at once.</div></div></div>
+{% if can('issuer') %}
+<form method="post" action="/admin/batches" class="card" style="max-width:980px">
+  <h2>New batch</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="cols">
+    <div class="field"><label for="c">Course</label><select id="c" name="course_id" required><option value="">Choose…</option>{% for c in courses %}<option value="{{ c.id }}">{{ c.code }} · {{ c.title }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="i">Instructor</label><select id="i" name="instructor_id"><option value="">—</option>{% for i in instructors %}<option value="{{ i.id }}">{{ i.full_name }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="s">Start date</label><input id="s" type="date" name="start_date" required></div>
+    <div class="field"><label for="e">Completion date</label><input id="e" type="date" name="end_date" required></div>
+    <div class="field"><label for="l">Location (internal)</label><input id="l" type="text" name="location" maxlength="200"></div>
+  </div>
+  <button class="btn" type="submit">Create batch</button>
+</form>
+{% endif %}
+<div class="tablebox"><table>
+  <tr><th>Reference</th><th>Course</th><th>Dates</th><th>Instructor</th><th>Participants</th></tr>
+  {% for b in rows %}<tr><td class="mono"><a href="/admin/batches/{{ b.id }}">{{ b.reference }}</a></td><td>{{ b.course.title }}<div class="small muted">{{ b.course.code }}</div></td>
+    <td>{{ b.start_date|dt }} → {{ b.end_date|dt }}</td><td>{{ b.instructor.full_name if b.instructor else '—' }}</td><td>{{ b.enrollments|length }}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No batches yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

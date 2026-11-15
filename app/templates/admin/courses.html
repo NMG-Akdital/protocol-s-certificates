@@ -1,0 +1,28 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Courses</h1><div class="muted">Changing a course does not change certificates that have already been issued.</div></div></div>
+{% if can('issuer') %}
+<form method="post" action="/admin/courses/save" class="card" style="max-width:980px">
+  <h2>{{ 'Edit ' ~ edit.code if edit else 'Add a course' }}</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="cid" value="{{ edit.id if edit else '' }}">
+  <div class="cols">
+    <div class="field"><label for="code">Course code</label><input id="code" type="text" name="code" required maxlength="40" value="{{ edit.code if edit else '' }}" placeholder="PS-HSE-001"></div>
+    <div class="field"><label for="title">Course title</label><input id="title" type="text" name="title" required maxlength="160" value="{{ edit.title if edit else '' }}" placeholder="Flagman / Banksman Training"></div>
+    <div class="field"><label for="cat">Category</label><input id="cat" type="text" name="category" list="cats" maxlength="100" value="{{ edit.category if edit else '' }}" placeholder="HSE & Occupational Safety"><datalist id="cats">{% for c in cats %}<option value="{{ c }}">{% endfor %}</datalist></div>
+    <div class="field"><label for="hrs">Default duration (hours)</label><input id="hrs" type="text" inputmode="decimal" name="duration_hours" required value="{{ edit.duration_hours|hours if edit else '' }}" placeholder="8"></div>
+    <div class="field"><label for="vm">Certificate validity (months)</label><input id="vm" type="text" inputmode="numeric" name="validity_months" value="{{ edit.validity_months or '' if edit else '' }}" placeholder="e.g. 24 — blank = no expiry"><div class="hint">"Valid until" = completion date + this period.</div></div>
+  </div>
+  <div class="field"><label for="desc">Description (internal)</label><textarea id="desc" name="description" maxlength="2000">{{ edit.description if edit else '' }}</textarea></div>
+  {% if edit %}<label class="check"><input type="checkbox" name="is_active" {{ 'checked' if edit.is_active }}> Active (available for new certificates)</label>{% endif %}
+  <div class="actions" style="margin-top:14px"><button class="btn" type="submit">{{ 'Save changes' if edit else 'Add course' }}</button>{% if edit %}<a class="btn secondary" href="/admin/courses">Cancel</a>{% endif %}</div>
+</form>
+{% endif %}
+<div class="tablebox"><table>
+  <tr><th>Code</th><th>Title</th><th>Category</th><th>Hours</th><th>Validity</th><th>Status</th><th></th></tr>
+  {% for c in rows %}<tr><td class="mono">{{ c.code }}</td><td>{{ c.title }}</td><td>{{ c.category }}</td><td>{{ c.duration_hours|hours }}</td><td>{{ (c.validity_months ~ ' months') if c.validity_months else 'No expiry' }}</td><td>{{ 'Active' if c.is_active else 'Inactive' }}</td>
+    <td>{% if can('issuer') %}<a class="btn secondary small" href="/admin/courses/{{ c.id }}">Edit</a>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="7" class="muted">No courses yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Verification log{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Verification log</h1><div class="muted">Every public lookup. IP addresses are stored only as one-way hashes.</div></div></div>
+<div class="grid" style="margin-bottom:18px">
+  {% for k in ['VALID','REVOKED','NOT_FOUND','INVALID'] %}<div class="stat"><b>{{ stats.get(k, 0) }}</b><span>{{ k.replace('_',' ') }}</span></div>{% endfor %}
+</div>
+<form class="toolbar" method="get"><input type="search" name="q" value="{{ q }}" placeholder="Certificate ID" aria-label="Filter by certificate ID"><button class="btn secondary" type="submit">Filter</button></form>
+<div class="tablebox"><table><tr><th>When</th><th>Certificate ID</th><th>Result</th><th>Via</th><th>Visitor</th></tr>
+{% for v in rows %}<tr><td class="small">{{ v.at|dt }}</td><td class="mono">{{ v.query }}</td><td><span class="badge b-{{ v.result }}">{{ v.result.replace('_',' ') }}</span></td><td>{{ v.via }}</td><td class="small muted" style="max-width:280px;overflow-wrap:anywhere">{{ v.ip_hash[:10] }} · {{ v.user_agent[:60] }}</td></tr>
+{% else %}<tr><td colspan="5" class="muted">No lookups yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

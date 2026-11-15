@@ -1,0 +1,58 @@
+{% extends "public/_base.html" %}
+{% block title %}{{ result.replace('_', ' ') }} · {{ query }}{% endblock %}
+{% block content %}
+<div class="result">
+  <div class="banner {{ result }}" role="status">
+    <div class="icon" aria-hidden="true">
+      {% if result == 'VALID' %}<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M4 12.5l5 5L20 6.5"/></svg>
+      {% elif result == 'EXPIRED' %}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>
+      {% elif result == 'NOT_FOUND' %}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+      {% else %}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M6 6l12 12M18 6L6 18"/></svg>{% endif %}
+    </div>
+    <div>
+      <div class="st">{% if result == 'VALID' %}VALID{% elif result == 'REVOKED' %}REVOKED{% elif result == 'EXPIRED' %}EXPIRED{% elif result == 'INVALID' %}NOT VERIFIED{% else %}NOT FOUND{% endif %}</div>
+      <div class="sub">
+        {% if result == 'VALID' %}Certificate successfully verified.
+        {% elif result == 'REVOKED' %}This certificate has been revoked by the training center.
+        {% elif result == 'EXPIRED' %}This certificate was genuinely issued, but its validity period ended on {{ expiry }}.
+        {% elif result == 'INVALID' %}This record failed its integrity check. Contact the training center.
+        {% else %}No matching certificate exists in the database.{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="body">
+    {% if cert %}
+      <div class="small muted" style="letter-spacing:.14em;text-transform:uppercase">Issued to</div>
+      <div class="name">{{ name }}</div>
+      {% if name_masked %}<p class="small muted" style="margin:6px 0 0">Name shortened for privacy. Scan the QR code on the certificate to see the full name.</p>{% endif %}
+      <div class="facts">
+        <div><span>Certificate ID</span><b class="mono">{{ cert.certificate_no }}</b></div>
+        <div><span>Training course</span><b>{{ cert.course_title }}</b></div>
+        <div><span>Course code</span><b>{{ cert.course_code }}</b></div>
+        <div><span>Training duration</span><b>{{ hours }} {{ "hour" if hours == "1" else "hours" }}</b></div>
+        <div><span>Training completion date</span><b>{{ completion }}</b></div>
+        <div><span>Certificate issue date</span><b>{{ issued }}</b></div>
+        {% if expiry %}<div><span>Valid until</span><b>{{ expiry }}</b></div>{% endif %}
+        {% if instructor %}<div><span>Instructor</span><b>{{ instructor }}</b></div>{% endif %}
+        <div><span>Issuing organization</span><b>{{ s.center_name }}</b></div>
+        <div><span>Status</span><b>{{ {'VALID': 'Valid', 'REVOKED': 'Revoked', 'EXPIRED': 'Expired'}[result] }}</b></div>
+        {% for a in accreditations %}<div><span>{{ a.body }}</span><b>{{ a.statement }}{% if a.ref %} · No. {{ a.ref }}{% endif %}</b></div>{% endfor %}
+      </div>
+      {% if result == 'REVOKED' %}
+        <p style="margin-top:20px" class="small">Revoked on {{ cert.revoked_at.strftime('%d %B %Y') if cert.revoked_at }}.
+        {% if replacement %}This certificate was replaced by <a href="/verify/{{ replacement }}?m=1" class="mono">{{ replacement }}</a>.{% endif %}</p>
+      {% endif %}
+      {% if pdf_link %}<div class="actions" style="margin-top:22px"><a class="btn" href="{{ pdf_link }}">View certificate PDF</a></div>{% endif %}
+    {% else %}
+      <dl class="kv"><dt>Certificate ID searched</dt><dd class="mono">{{ query }}</dd></dl>
+      <p class="small muted" style="margin-top:16px">Check that the ID is typed exactly as printed (for example PS-2026-000001). If the problem continues, contact {{ s.center_name }}.</p>
+    {% endif %}
+    <form method="get" action="/verify" class="lookup" style="margin-top:26px">
+      <label for="cid" style="position:absolute;left:-9999px">Check another certificate ID</label>
+      <input id="cid" type="text" name="id" placeholder="Check another ID" autocomplete="off">
+      <button class="btn secondary" type="submit">Verify</button>
+    </form>
+    <p class="small muted" style="margin-top:14px">Checked {{ now_utc if now_utc else '' }}</p>
+  </div>
+</div>
+{% endblock %}

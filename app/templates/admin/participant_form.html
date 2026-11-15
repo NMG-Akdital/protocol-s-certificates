@@ -1,0 +1,27 @@
+{% extends "admin/_layout.html" %}
+{% block title %}{{ p.full_name if p else 'New participant' }}{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>{{ p.full_name if p else 'New participant' }}</h1></div>
+  {% if p and can('issuer') %}<div class="actions"><a class="btn" href="/admin/certificates/new?participant_id={{ p.id }}">New certificate for this participant</a></div>{% endif %}</div>
+{% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+<form method="post" action="/admin/participants/save" class="card" style="max-width:900px">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="pid" value="{{ p.id if p else '' }}">
+  <div class="cols">
+    <div class="field"><label for="fn">Full name (as printed on certificates)</label><input id="fn" type="text" name="full_name" maxlength="120" required value="{{ p.full_name if p else '' }}"></div>
+    <div class="field"><label for="ni">National ID / Iqama / Passport (private)</label><input id="ni" type="text" name="national_id" maxlength="60" value="{{ p.national_id or '' if p else '' }}"></div>
+    <div class="field"><label for="co">Company (private)</label><input id="co" type="text" name="company" maxlength="200" value="{{ p.company or '' if p else '' }}"></div>
+    <div class="field"><label for="em">Email (private)</label><input id="em" type="email" name="email" maxlength="255" value="{{ p.email or '' if p else '' }}"></div>
+    <div class="field"><label for="ph">Phone (private)</label><input id="ph" type="text" name="phone" maxlength="40" value="{{ p.phone or '' if p else '' }}"></div>
+  </div>
+  <div class="field"><label for="nt">Notes (private)</label><textarea id="nt" name="notes" maxlength="2000">{{ p.notes if p else '' }}</textarea></div>
+  {% if can('issuer') %}<button class="btn" type="submit">Save participant</button>{% endif %}
+</form>
+{% if p %}
+<div class="card"><h2>Certificates</h2>
+  <div class="tablebox"><table><tr><th>ID</th><th>Course</th><th>Completed</th><th>Status</th></tr>
+  {% for c in certs %}<tr><td class="mono"><a href="/admin/certificates/{{ c.id }}">{{ c.certificate_no or 'Draft #' ~ c.id }}</a></td><td>{{ c.course_title }}</td><td>{{ c.completion_date|dt }}</td><td><span class="badge b-{{ c.status }}">{{ c.status }}</span></td></tr>
+  {% else %}<tr><td colspan="4" class="muted">None yet.</td></tr>{% endfor %}
+  </table></div></div>
+{% endif %}
+{% endblock %}

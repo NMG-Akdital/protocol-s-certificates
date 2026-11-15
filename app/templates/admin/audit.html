@@ -1,0 +1,9 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Audit log</h1><div class="muted">Append-only record of administrative actions.</div></div></div>
+<form class="toolbar" method="get"><input type="search" name="q" value="{{ q }}" placeholder="Action, certificate ID or user email" aria-label="Filter"><button class="btn secondary" type="submit">Filter</button></form>
+<div class="tablebox"><table><tr><th>When</th><th>User</th><th>Action</th><th>Reference</th><th>Details</th><th>IP</th></tr>
+{% for a in rows %}<tr><td class="small">{{ a.at|dt }}</td><td class="small">{{ a.user_email }}</td><td>{{ a.action }}</td><td class="mono small">{{ a.entity }} {{ a.entity_ref }}</td><td class="small" style="max-width:360px;overflow-wrap:anywhere">{{ a.details }}</td><td class="small muted">{{ a.ip }}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">Nothing recorded yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

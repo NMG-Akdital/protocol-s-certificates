@@ -1,0 +1,33 @@
+{% extends "admin/_layout.html" %}
+{% block title %}{{ b.reference }}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1 class="mono">{{ b.reference }}</h1>
+    <div class="muted">{{ b.course.code }} · {{ b.course.title }} · {{ daterange(b.start_date, b.end_date) }} · {{ b.course.duration_hours|hours }} h{% if b.instructor %} · {{ b.instructor.full_name }}{% endif %}</div></div>
+  <div class="actions">
+    {% if can('issuer') %}<form method="post" action="/admin/batches/{{ b.id }}/issue" class="inline" data-confirm="Issue certificates for every participant marked 'completed' who does not have one yet?"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn" type="submit">Issue certificates for completed participants</button></form>{% endif %}
+    <a class="btn secondary" href="/admin/batches/{{ b.id }}/zip">Download all as ZIP</a>
+  </div>
+</div>
+{% if request.query_params.get('zip') %}<div class="flash">Your ZIP is ready: <a href="/admin/exports/{{ request.query_params.get('zip') }}">download certificates ZIP</a></div>{% endif %}
+{% if can('issuer') %}
+<form method="post" action="/admin/batches/{{ b.id }}/add" class="card" style="max-width:900px">
+  <h2>Add participants</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="field"><label for="names">Names, one per line</label><textarea id="names" name="names" placeholder="Ahmed Mohamed&#10;Mohamed Ali&#10;Sara Ahmed"></textarea><div class="hint">Existing participants with exactly the same name are reused; new names are registered automatically.</div></div>
+  <button class="btn secondary" type="submit">Add to batch</button>
+</form>
+{% endif %}
+<div class="tablebox"><table>
+  <tr><th>Participant</th><th>Completed</th><th>Certificate</th><th></th></tr>
+  {% for e in b.enrollments %}{% set c = certs.get(e.participant_id) %}
+  <tr><td><a href="/admin/participants/{{ e.participant_id }}">{{ e.participant.full_name }}</a></td>
+    <td>{{ 'Yes' if e.completed else 'No' }}</td>
+    <td>{% if c %}<a class="mono" href="/admin/certificates/{{ c.id }}">{{ c.certificate_no or 'Draft' }}</a>{% else %}<span class="muted">—</span>{% endif %}</td>
+    <td>{% if can('issuer') and not c %}
+      <form method="post" action="/admin/batches/{{ b.id }}/enrollment/{{ e.id }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="action" value="toggle"><button class="btn secondary small" type="submit">Mark {{ 'not completed' if e.completed else 'completed' }}</button></form>
+      <form method="post" action="/admin/batches/{{ b.id }}/enrollment/{{ e.id }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="action" value="remove"><button class="btn secondary small" type="submit">Remove</button></form>
+    {% endif %}</td></tr>
+  {% else %}<tr><td colspan="4" class="muted">No participants yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

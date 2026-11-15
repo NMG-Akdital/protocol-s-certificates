@@ -1,0 +1,56 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Import #{{ job.id }}{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Import #{{ job.id }} <span class="badge b-{{ job.status }}" style="vertical-align:middle">{{ job.status }}</span></h1><div class="muted">{{ job.filename }} · {{ job.created_at|dt }}</div></div></div>
+
+{% if job.status == 'validated' %}
+<div class="grid" style="margin-bottom:18px">
+  <div class="stat"><b>{{ summary.ok }}</b><span>Ready to issue</span></div>
+  <div class="stat"><b>{{ summary.error }}</b><span>Rows with errors</span></div>
+  <div class="stat"><b>{{ summary.duplicate }}</b><span>Duplicates (skipped)</span></div>
+</div>
+<div class="card">
+  <h2>2 · Check the sample, then issue</h2>
+  <p style="margin-top:0">Rows with errors and duplicates are <b>not</b> issued. Fix them in your file and upload it again later if needed.</p>
+  <div class="actions">
+    {% if summary.ok %}<a class="btn secondary" href="/admin/import/{{ job.id }}/sample.pdf" target="_blank" rel="noopener">Open sample certificate (longest name)</a>{% endif %}
+    {% if summary.ok and can('issuer') %}<form method="post" action="/admin/import/{{ job.id }}/confirm" class="inline" data-confirm="Issue {{ summary.ok }} certificate(s)? Each receives a permanent certificate ID."><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn" type="submit">Issue {{ summary.ok }} certificate{{ 's' if summary.ok != 1 }}</button></form>{% endif %}
+    <form method="post" action="/admin/import/{{ job.id }}/cancel" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn secondary" type="submit">Cancel import</button></form>
+  </div>
+</div>
+{% elif job.status == 'processing' %}
+<div class="card" data-autorefresh>
+  <h2>Issuing certificates and generating PDFs…</h2>
+  <div class="progress" aria-label="Progress"><div style="width: {{ (100 * job.progress / job.total)|round|int if job.total else 5 }}%"></div></div>
+  <p class="small muted">{{ job.progress }} of {{ job.total or '…' }} PDFs. This page refreshes automatically.</p>
+</div>
+{% elif job.status == 'completed' %}
+<div class="card">
+  <h2>Done: {{ certs|length }} certificate{{ 's' if certs|length != 1 }} issued</h2>
+  <div class="actions"><a class="btn" href="/admin/import/{{ job.id }}/zip">Download ZIP of all certificates</a></div>
+</div>
+{% elif job.status == 'failed' %}
+<div class="alert">The import stopped: {{ job.error }}{% if certs %} — {{ certs|length }} certificate(s) were issued; you can still download them below.{% endif %}</div>
+{% if certs %}<div class="actions" style="margin-bottom:16px"><a class="btn" href="/admin/import/{{ job.id }}/zip">Download ZIP</a></div>{% endif %}
+{% endif %}
+
+{% if certs %}
+<h2>Issued certificates</h2>
+<div class="tablebox" style="margin-bottom:20px"><table><tr><th>Certificate ID</th><th>Participant</th><th>Course</th><th>Status</th></tr>
+{% for c in certs %}<tr><td class="mono"><a href="/admin/certificates/{{ c.id }}">{{ c.certificate_no }}</a></td><td>{{ c.participant_name }}</td><td>{{ c.course_code }}</td><td><span class="badge b-{{ c.status }}">{{ c.status }}</span></td></tr>{% endfor %}
+</table></div>
+{% endif %}
+
+<h2>Validation report</h2>
+<div class="tablebox"><table>
+  <tr><th>Row</th><th>Status</th><th>Participant</th><th>Course</th><th>Dates</th><th>Hours</th><th>Valid until</th><th>Notes</th></tr>
+  {% for r in rows %}
+  <tr><td>{{ r.row }}</td><td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td>
+    <td>{{ r.data.participant_name }}</td><td>{{ r.data.course_code }}<div class="small muted">{{ r.data.course_title }}</div></td>
+    <td class="small">{{ r.data.start_date }} → {{ r.data.completion_date }}</td><td>{{ r.data.duration }}</td><td class="small">{{ r.data.expiry_date or '—' }}</td>
+    <td class="small">{% for e in r.errors %}<div style="color:#A3261D">✕ {{ e }}</div>{% endfor %}
+      {% if r.duplicate_of %}<div style="color:#8A5A00">Duplicate: {{ r.duplicate_of }}</div>{% endif %}
+      {% for w in r.warnings %}<div class="muted">• {{ w }}</div>{% endfor %}</td></tr>
+  {% endfor %}
+</table></div>
+{% endblock %}

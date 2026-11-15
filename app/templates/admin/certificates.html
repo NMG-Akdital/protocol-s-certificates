@@ -1,0 +1,38 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Certificates{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>Certificates</h1><div class="muted">Search by certificate ID, participant name or course code.</div></div>
+  <div class="actions">
+    {% if can('issuer') %}<a class="btn" href="/admin/certificates/new">New certificate</a>{% endif %}
+    <a class="btn secondary" href="/admin/certificates/export.csv">Export register (CSV)</a>
+  </div>
+</div>
+<form class="toolbar" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="PS-2026-000001, Ahmed Mohamed, PS-HSE-001…" aria-label="Search">
+  <select name="status" aria-label="Status">
+    <option value="">All statuses</option>
+    {% for st, label in [('issued','Issued'),('expiring','Expiring within 60 days'),('expired','Expired'),('revoked','Revoked'),('draft','Draft')] %}<option value="{{ st }}" {{ 'selected' if status == st }}>{{ label }}</option>{% endfor %}
+  </select>
+  <select name="course_id" aria-label="Course">
+    <option value="">All courses</option>
+    {% for c in courses %}<option value="{{ c.id }}" {{ 'selected' if course_id == c.id }}>{{ c.code }} · {{ c.title }}</option>{% endfor %}
+  </select>
+  <button class="btn secondary" type="submit">Search</button>
+</form>
+<div class="tablebox"><table>
+  <tr><th>Certificate ID</th><th>Participant</th><th>Course</th><th>Completed</th><th>Issued</th><th>Valid until</th><th>Status</th></tr>
+  {% for c in certs %}
+  <tr>
+    <td class="mono"><a href="/admin/certificates/{{ c.id }}">{{ c.certificate_no or 'Draft #' ~ c.id }}</a></td>
+    <td>{{ c.participant_name }}</td>
+    <td>{{ c.course_title }}<div class="small muted">{{ c.course_code }} · {{ c.duration_hours|hours }} h</div></td>
+    <td>{{ c.completion_date|dt }}</td>
+    <td>{{ c.issue_date|dt }}</td>
+    <td>{{ c.expiry_date|dt or '—' }}</td>
+    <td>{% if c.status == 'issued' and c.expiry_date and c.expiry_date < today %}<span class="badge b-expired">expired</span>{% else %}<span class="badge b-{{ c.status }}">{{ c.status }}</span>{% endif %}</td>
+  </tr>
+  {% else %}<tr><td colspan="7" class="muted">No certificates match.</td></tr>{% endfor %}
+</table></div>
+{% if certs|length >= 200 %}<p class="small muted">Showing the 200 most recent matches. Refine the search to narrow it down.</p>{% endif %}
+{% endblock %}

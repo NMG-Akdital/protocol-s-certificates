@@ -1,0 +1,30 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>Dashboard</h1><div class="muted">{{ settings.public_base_url }}/verify</div></div>
+  {% if can('issuer') %}<div class="actions"><a class="btn" href="/admin/certificates/new">New certificate</a><a class="btn secondary" href="/admin/import">Bulk import</a></div>{% endif %}
+</div>
+<div class="grid" style="margin-bottom:20px">
+  <div class="stat"><b>{{ counts.get('issued', 0) - expired }}</b><span>Valid certificates</span></div>
+  <div class="stat"><b>{{ counts.get('revoked', 0) }}</b><span>Revoked</span></div>
+  <div class="stat"><b><a href="/admin/certificates?status=expiring" style="text-decoration:none">{{ expiring }}</a></b><span>Expiring · 60 days</span></div>
+  <div class="stat"><b><a href="/admin/certificates?status=expired" style="text-decoration:none">{{ expired }}</a></b><span>Expired</span></div>
+  <div class="stat"><b>{{ counts.get('draft', 0) }}</b><span>Drafts</span></div>
+  <div class="stat"><b>{{ ver30 }}</b><span>Verifications · 30 days</span></div>
+  <div class="stat"><b>{{ participants }}</b><span>Participants</span></div>
+  <div class="stat"><b>{{ courses_n }}</b><span>Courses</span></div>
+</div>
+<div class="cols" style="gap:18px">
+  <div class="card"><h2>Recently issued</h2>
+    {% if recent %}<div class="tablebox"><table><tr><th>ID</th><th>Participant</th><th>Status</th></tr>
+    {% for c in recent %}<tr><td class="mono"><a href="/admin/certificates/{{ c.id }}">{{ c.certificate_no }}</a></td><td>{{ c.participant_name }}<div class="small muted">{{ c.course_code }}</div></td><td><span class="badge b-{{ c.status }}">{{ c.status }}</span></td></tr>{% endfor %}
+    </table></div>{% else %}<p class="muted">No certificates issued yet.</p>{% endif %}
+  </div>
+  <div class="card"><h2>Latest verifications</h2>
+    {% if recent_ver %}<div class="tablebox"><table><tr><th>When</th><th>ID</th><th>Result</th></tr>
+    {% for v in recent_ver %}<tr><td class="small">{{ v.at|dt }}</td><td class="mono">{{ v.query }}</td><td><span class="badge b-{{ v.result }}">{{ v.result.replace('_',' ') }}</span> <span class="small muted">{{ v.via }}</span></td></tr>{% endfor %}
+    </table></div>{% else %}<p class="muted">No verification requests yet.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

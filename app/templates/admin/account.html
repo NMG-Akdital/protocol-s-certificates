@@ -1,0 +1,14 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Account{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Your account</h1><div class="muted">{{ user.email }} · {{ user.role }}</div></div></div>
+{% for e in errors or [] %}<div class="alert">{{ e }}</div>{% endfor %}
+<form method="post" action="/admin/account/password" class="card" style="max-width:520px">
+  <h2>Change password</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="field"><label for="c">Current password</label><input id="c" type="password" name="current" required autocomplete="current-password"></div>
+  <div class="field"><label for="n">New password</label><input id="n" type="password" name="new" required autocomplete="new-password"><div class="hint">12+ characters, upper and lower case, and a number.</div></div>
+  <div class="field"><label for="f">Confirm new password</label><input id="f" type="password" name="confirm" required autocomplete="new-password"></div>
+  <button class="btn" type="submit">Change password</button>
+</form>
+{% endblock %}

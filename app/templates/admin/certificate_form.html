@@ -1,0 +1,74 @@
+{% extends "admin/_layout.html" %}
+{% set heading = 'New certificate' if mode == 'new' else ('Edit draft' if mode == 'edit' else 'Reissue ' ~ c.certificate_no) %}
+{% block title %}{{ 'New certificate' if mode == 'new' else ('Edit draft' if mode == 'edit' else 'Reissue certificate') }}{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{{ heading }}</h1>
+  <div class="muted">{% if mode == 'reissue' %}A new certificate ID is issued and {{ c.certificate_no }} is revoked, with a link to its replacement.{% else %}Save as a draft to check the PDF, or issue straight away.{% endif %}</div>
+</div></div>
+{% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+<form method="post" action="{{ '/admin/certificates' if mode == 'new' else '/admin/certificates/' ~ c.id ~ ('/edit' if mode == 'edit' else '/reissue') }}" class="card" style="max-width:900px">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <h2>Participant</h2>
+  <input type="hidden" name="participant_id" value="{{ form.participant_id or '' }}">
+  {% if mode == 'reissue' %}
+    <div class="field"><label>Participant</label><div>{{ form.participant_label or c.participant_name }}</div></div>
+    <div class="field"><label for="corrected_name">Corrected name (only if the printed name was wrong)</label>
+      <input id="corrected_name" type="text" name="corrected_name" maxlength="120" value="{{ form.corrected_name or '' }}" placeholder="{{ c.participant_name }}"></div>
+  {% else %}
+  <div class="field suggest" data-participant-search>
+    <label for="psearch">Find an existing participant</label>
+    <input id="psearch" type="search" placeholder="Type a name or ID number…" autocomplete="off">
+  </div>
+  <div class="chosen" data-chosen>{{ 'Selected: ' ~ form.participant_label if form.participant_label else 'No participant selected' }}</div>
+  <button type="button" class="btn secondary small" data-clear-participant style="margin:8px 0 16px">Clear selection</button>
+  <details class="box" {{ 'open' if not form.participant_id }}>
+    <summary>…or register a new participant</summary>
+    <div class="cols" style="margin-top:12px">
+      <div class="field"><label for="np">Full name (as it should be printed)</label><input id="np" type="text" name="new_participant_name" maxlength="120" value="{{ form.new_participant_name or '' }}"></div>
+      <div class="field"><label for="nid">National ID / Iqama (private)</label><input id="nid" type="text" name="new_participant_national_id" maxlength="60" value="{{ form.new_participant_national_id or '' }}"><div class="hint">Never shown on the certificate or the public page.</div></div>
+      <div class="field"><label for="nco">Company (private)</label><input id="nco" type="text" name="new_participant_company" maxlength="200" value="{{ form.new_participant_company or '' }}"></div>
+    </div>
+  </details>
+  {% endif %}
+
+  <h2 style="margin-top:8px">Training</h2>
+  <div class="cols">
+    <div class="field"><label for="course">Course</label>
+      <select id="course" name="course_id" required data-hours>
+        <option value="">Choose…</option>
+        {% for co in courses %}<option value="{{ co.id }}" data-hours="{{ co.duration_hours|hours }}" {{ 'selected' if form.course_id|string == co.id|string }}>{{ co.code }} · {{ co.title }}</option>{% endfor %}
+      </select>
+      {% if not courses %}<div class="hint">No courses yet. <a href="/admin/courses">Add a course</a> first.</div>{% endif %}
+    </div>
+    <div class="field"><label for="ctitle">Printed course title (optional)</label><input id="ctitle" type="text" name="course_title" maxlength="160" value="{{ form.course_title or '' }}"><div class="hint">Leave blank to print the course's catalogue title.</div></div>
+    <div class="field"><label for="hours">Duration (hours)</label><input id="hours" type="text" inputmode="decimal" name="duration_hours" value="{{ form.duration_hours or '' }}"><div class="hint">Leave blank to use the course default.</div></div>
+    <div class="field"><label for="sd">Training start date</label><input id="sd" type="date" name="start_date" value="{{ form.start_date or '' }}" required></div>
+    <div class="field"><label for="cd">Training completion date</label><input id="cd" type="date" name="completion_date" value="{{ form.completion_date or '' }}" required></div>
+    <div class="field"><label for="exp">Valid until (optional)</label><input id="exp" type="date" name="expiry_date" value="{{ form.expiry_date or '' }}"><div class="hint">Blank = the course's validity period (or no expiry if the course has none).</div>
+      <label class="check" style="margin-top:6px"><input type="checkbox" name="no_expiry" {{ 'checked' if form.no_expiry in (True, 'on') }}> This certificate does not expire</label></div>
+    <div class="field"><label for="ins">Instructor</label>
+      <select id="ins" name="instructor_id"><option value="">—</option>
+        {% for i in instructors %}<option value="{{ i.id }}" {{ 'selected' if form.instructor_id|string == i.id|string }}>{{ i.full_name }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label for="bt">Training batch (optional)</label>
+      <select id="bt" name="batch_id"><option value="">—</option>
+        {% for b in batches %}<option value="{{ b.id }}" {{ 'selected' if form.batch_id|string == b.id|string }}>{{ b.reference }} · {{ b.course.code }} · {{ b.start_date }}</option>{% endfor %}
+      </select></div>
+  </div>
+  <label class="check"><input type="checkbox" name="allow_public_pdf" {{ 'checked' if form.allow_public_pdf in (True, 'on') }}> Allow the PDF to be viewed from the public verification page (only when opened with the QR code)</label>
+  {% if mode == 'new' %}
+  <label class="check" style="margin-top:8px"><input type="checkbox" name="confirm_duplicate"> Create anyway if this participant already has a certificate for this course and date</label>
+  {% endif %}
+  {% if mode == 'reissue' %}
+  <div class="field" style="margin-top:16px"><label for="reason">Reason for reissuing (recorded in the audit log)</label><input id="reason" type="text" name="reason" required minlength="5" maxlength="500" value="{{ form.reason or '' }}" placeholder="e.g. Participant name misspelled"></div>
+  <div class="actions" style="margin-top:18px"><button class="btn" type="submit">Revoke {{ c.certificate_no }} and issue replacement</button><a class="btn secondary" href="/admin/certificates/{{ c.id }}">Cancel</a></div>
+  {% else %}
+  <div class="actions" style="margin-top:20px">
+    <button class="btn secondary" type="submit" name="action" value="draft">Save draft</button>
+    <button class="btn" type="submit" name="action" value="issue">Save and issue</button>
+  </div>
+  <p class="small muted">Issuing assigns the certificate ID and QR code, and locks the details.</p>
+  {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>First-time setup · Protocol S Certificates</title>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="auth">
+  <div class="card" style="max-width:480px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <img src="/static/brand/logo-mark.svg" alt="" width="44" height="44">
+      <div><b style="letter-spacing:.08em;color:#0E2240">PROTOCOL S</b><div class="muted" style="font-size:10px;letter-spacing:.22em">FIRST-TIME SETUP</div></div>
+    </div>
+    <h1 style="font-size:22px">Create the administrator account</h1>
+    <p class="muted small" style="margin-top:0">This page works once only. It closes as soon as the first account exists.</p>
+    {% for e in errors or [] %}<div class="alert" role="alert">{{ e }}</div>{% endfor %}
+    <form method="post" action="/setup">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      {% if need_token %}<div class="field"><label for="t">Setup token</label><input id="t" type="text" name="token" required autocomplete="off"><div class="hint">In the hosting dashboard: your service → Environment → SETUP_TOKEN.</div></div>{% endif %}
+      <div class="field"><label for="n">Your full name</label><input id="n" type="text" name="full_name" required value="{{ full_name or '' }}"></div>
+      <div class="field"><label for="e">Email</label><input id="e" type="email" name="email" required autocomplete="username" value="{{ email or '' }}"></div>
+      <div class="field"><label for="p">Password</label><input id="p" type="password" name="password" required autocomplete="new-password"><div class="hint">12+ characters, upper and lower case, and a number.</div></div>
+      <div class="field"><label for="c">Confirm password</label><input id="c" type="password" name="confirm" required autocomplete="new-password"></div>
+      <button class="btn" type="submit" style="width:100%">Create account</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
