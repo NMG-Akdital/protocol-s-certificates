@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocol S — Certificates &amp; Training Cards</title>
+<style>
+/*__FONTS__*/
+:root { --navy:#0E2240; --navy2:#1A3358; --gold:#B08D57; --goldink:#7A5C2E; --paper:#F6F4EF; --line:#DDE1E6; --steel:#5F6873; --ok:#1D6B4F; --err:#A3261D; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; font-family: "Plex Sans", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; color: #1E2226; background: var(--paper); font-size: 15px; }
+button, input, select, textarea { font: inherit; }
+.top { background: var(--navy); color: #fff; }
+.top .in { max-width: 1320px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.top img { width: 34px; height: 34px; }
+.top b { letter-spacing: .1em; font-weight: 600; } .top small { display: block; font-size: 9.5px; letter-spacing: .24em; color: #C9CED4; }
+.tabs { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
+.tabs button { background: transparent; color: #DCE2EA; border: 0; padding: 9px 14px; border-radius: 4px; cursor: pointer; min-height: 40px; }
+.tabs button[aria-selected="true"] { background: var(--navy2); color: #fff; box-shadow: inset 0 -3px 0 var(--gold); }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 22px 20px 60px; }
+.banner { padding: 10px 14px; margin-bottom: 16px; border-left: 4px solid var(--gold); background: #FFF8EA; font-size: 13.5px; }
+.banner.err { border-color: var(--err); background: #FBEAE8; }
+.banner.ok { border-color: var(--ok); background: #E7F3EE; }
+.grid2 { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start; }
+.col-form { flex: 1 1 380px; max-width: 480px; min-width: 0; }
+.col-prev { flex: 999 1 520px; min-width: 0; }
+.card { background: #fff; border: 1px solid var(--line); padding: 18px 20px; margin-bottom: 18px; }
+h2 { font-size: 17px; color: var(--navy); margin: 0 0 12px; font-weight: 600; }
+label { display: block; font-size: 13px; font-weight: 600; color: #2E3338; margin-bottom: 5px; }
+.field { margin-bottom: 13px; }
+.hint { font-size: 12px; color: var(--steel); margin-top: 4px; font-weight: 400; }
+input[type=text], input[type=date], input[type=number], select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #C6CCD3; border-radius: 3px; background: #fff; min-height: 42px; color: inherit; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+.row2 { display: flex; gap: 12px; flex-wrap: wrap; } .row2 > .field { flex: 1 1 150px; min-width: 0; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; font-size: 14px; margin-bottom: 8px; }
+.check input { margin-top: 3px; width: 16px; height: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border: 1px solid var(--navy); background: var(--navy); color: #fff; font-weight: 600; font-size: 14px; border-radius: 3px; cursor: pointer; text-decoration: none; }
+.btn:hover { background: var(--navy2); }
+.btn.sec { background: #fff; color: var(--navy); } .btn.sec:hover { background: var(--paper); }
+.btn.gold { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+.btn.danger { background: var(--err); border-color: var(--err); }
+.btn.sm { min-height: 34px; padding: 0 10px; font-size: 13px; }
+.btn[disabled] { opacity: .55; cursor: progress; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.seg button { border: 1px solid #C6CCD3; background: #fff; padding: 8px 14px; border-radius: 20px; cursor: pointer; min-height: 38px; }
+.seg button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+.stage { background: #E3E6EA; border: 1px solid var(--line); padding: 16px; overflow: hidden; }
+.stage .scaler { transform-origin: top left; }
+.stage { position: relative; }
+.stage.unissued::after { content: "PREVIEW · NOT ISSUED"; position: absolute; left: 0; right: 0; top: 42%; text-align: center; font-size: 34px; font-weight: 700; letter-spacing: .12em; color: rgba(163,38,29,.28); transform: rotate(-24deg); pointer-events: none; }
+.stage.cardstage .scaler { display: flex; gap: 24px; flex-wrap: wrap; }
+.meta { font-size: 13px; color: var(--steel); margin: 10px 0 0; }
+.empty { text-align: center; color: var(--steel); padding: 60px 20px; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th { text-align: left; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--steel); font-weight: 600; padding: 9px 10px; border-bottom: 1px solid var(--line); background: #FAFBFC; }
+td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; vertical-align: top; }
+.tablebox { overflow-x: auto; border: 1px solid var(--line); }
+.mono { font-family: "Plex Mono", ui-monospace, monospace; }
+.badge { display: inline-block; padding: 2px 8px; font-size: 11px; letter-spacing: .08em; font-weight: 600; text-transform: uppercase; border-radius: 3px; background: #E7F3EE; color: var(--ok); }
+.badge.revoked { background: #FBEAE8; color: var(--err); } .badge.expired { background: #FFF4DE; color: #8A5A00; }
+.offscreen { position: fixed; left: -20000px; top: 0; }
+.spinner { font-size: 13px; color: var(--steel); }
+#printArea { display: none; }
+@media print {
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block; }
+  #printArea .pg { page-break-after: always; break-after: page; }
+}
+@page { margin: 0; }
+
+/*__DESIGN_CSS__*/
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <img src="__LOGO_WHITE__" alt="">
+  <div><b>PROTOCOL S</b><small>CERTIFICATES &amp; TRAINING CARDS</small></div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="true" data-tab="new">New certificate</button>
+    <button role="tab" aria-selected="false" data-tab="reg">Register</button>
+    <button role="tab" aria-selected="false" data-tab="set">Settings</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <div id="storeNote" class="banner" hidden></div>
+
+  <!-- NEW -->
+  <section data-panel="new">
+    <div class="grid2">
+      <div class="col-form">
+        <form id="f" class="card" autocomplete="off">
+          <h2>Trainee</h2>
+          <div class="field"><label for="name">Full name (as it should be printed)</label><input id="name" type="text" maxlength="120" required placeholder="Ahmed Mohamed Ali"></div>
+          <div class="row2">
+            <div class="field"><label for="nid">National ID / Iqama No.</label><input id="nid" type="text" inputmode="numeric" maxlength="20" required placeholder="2xxxxxxxxx"></div>
+            <div class="field"><label for="nat">Nationality (optional)</label><input id="nat" type="text" maxlength="40" placeholder="Egyptian"></div>
+          </div>
+          <div class="field"><label for="comp">Company / Employer (optional)</label><input id="comp" type="text" maxlength="80"></div>
+          <div class="field"><label for="photo">Photo for the training card (optional)</label><input id="photo" type="file" accept="image/*"><div class="hint">Used on the card only. It is not saved in the register.</div></div>
+
+          <h2 style="margin-top:6px">Training</h2>
+          <div class="field"><label for="course">Course</label><select id="course"></select></div>
+          <div class="row2" id="customRow" hidden>
+            <div class="field"><label for="ctitle">Course title</label><input id="ctitle" type="text" maxlength="160"></div>
+            <div class="field"><label for="ccode">Course code</label><input id="ccode" type="text" maxlength="40" placeholder="PS-HSE-012"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="hours">Duration (hours)</label><input id="hours" type="number" min="0.5" max="2000" step="0.5" required></div>
+            <div class="field"><label for="valid">Validity</label>
+              <select id="valid"><option value="0">No expiry</option><option value="12">1 year</option><option value="24">2 years</option><option value="36">3 years</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="sd">Start date</label><input id="sd" type="date" required></div>
+            <div class="field"><label for="cd">Completion date</label><input id="cd" type="date" required></div>
+          </div>
+          <div class="field"><label for="ins">Instructor / Trainer</label><input id="ins" type="text" maxlength="80" placeholder="Eng. Khaled Mansour"></div>
+          <div class="field"><label>Accreditations on this certificate</label>
+            <label class="check"><input type="checkbox" id="accIosh"> <span id="accIoshLbl">IOSH</span></label>
+            <label class="check"><input type="checkbox" id="accOsha"> <span id="accOshaLbl">OSHA Academy</span></label>
+            <div class="hint">Wording and approval numbers are set in Settings.</div></div>
+          <div id="formErr" class="banner err" hidden></div>
+          <div class="actions"><button class="btn" type="submit" id="issueBtn">Issue certificate &amp; card</button>
+            <button class="btn sec" type="button" id="previewBtn">Preview only</button></div>
+          <p class="hint">Issuing assigns the next certificate number (PS-YYYY-NNNNNN) and saves the record in the register.</p>
+        </form>
+      </div>
+
+      <div class="col-prev">
+        <div class="card">
+          <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+            <h2 style="margin:0" id="prevTitle">Preview</h2>
+            <span id="prevStatus" class="spinner"></span>
+          </div>
+          <div class="seg" role="group" aria-label="Design">
+            <button type="button" data-design="classic" aria-pressed="true">Classic</button>
+            <button type="button" data-design="executive" aria-pressed="false">Executive</button>
+            <button type="button" data-design="heritage" aria-pressed="false">Heritage</button>
+            <button type="button" data-design="card" aria-pressed="false">Training card</button>
+          </div>
+          <div id="stage" class="stage"><div class="empty">Fill in the form to see the certificate.</div></div>
+          <div class="actions" style="margin-top:14px" id="dlRow">
+            <button class="btn" type="button" id="dlOne">Download PDF</button>
+            <button class="btn sec" type="button" id="dlAll">Download all (3 certificates + card)</button>
+          </div>
+          <p class="meta" id="dlNote"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTER -->
+  <section data-panel="reg" hidden>
+    <div class="card">
+      <div class="actions" style="justify-content:space-between;margin-bottom:12px">
+        <h2 style="margin:0">Certificate register</h2>
+        <div class="actions"><input id="q" type="text" placeholder="Search ID, name, Iqama, course" aria-label="Search" style="width:260px">
+          <button class="btn sec sm" id="csvBtn" type="button">Export CSV</button></div>
+      </div>
+      <div class="tablebox"><table>
+        <thead><tr><th>Certificate ID</th><th>Name</th><th>ID / Iqama</th><th>Course</th><th>Completed</th><th>Valid until</th><th>Check code</th><th>Status</th><th></th></tr></thead>
+        <tbody id="regBody"><tr><td colspan="9" class="spinner">Loading…</td></tr></tbody>
+      </table></div>
+      <div id="rvBox" class="banner err" hidden style="margin-top:12px">
+        <b>Revoke <span id="rvNo" class="mono"></span></b> — this marks the record as revoked in the register. The QR on printed copies cannot change.
+        <div class="actions" style="margin-top:8px"><input id="rvReason" type="text" placeholder="Reason (recorded)" style="flex:1 1 260px" aria-label="Reason for revoking">
+          <button class="btn danger sm" id="rvGo" type="button">Revoke</button><button class="btn sec sm" id="rvCancel" type="button">Cancel</button></div>
+      </div>
+      <p class="hint">To confirm a certificate someone shows you, search its ID here and compare the name and check code.</p>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section data-panel="set" hidden>
+    <form id="sf" class="card" style="max-width:860px">
+      <h2>Training center</h2>
+      <div class="row2">
+        <div class="field"><label for="s_center">Center name (in the certificate statement)</label><input id="s_center" type="text" maxlength="120"></div>
+        <div class="field"><label for="s_contact">Contact line (optional, small print)</label><input id="s_contact" type="text" maxlength="120" placeholder="www.example.com · +966 …"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="s_sig">Authorized signatory name</label><input id="s_sig" type="text" maxlength="80"></div>
+        <div class="field"><label for="s_sigt">Signatory title</label><input id="s_sigt" type="text" maxlength="80"></div>
+      </div>
+      <h2 style="margin-top:8px">Accreditations</h2>
+      <p class="hint" style="margin-top:-6px">Enter the wording and approval number exactly as on your approval letters. A logo file is optional; without it the body's name is printed as text.</p>
+      <div class="row2">
+        <div class="field"><label for="s_iosh_t">IOSH wording</label><input id="s_iosh_t" type="text" maxlength="80"></div>
+        <div class="field"><label for="s_iosh_n">IOSH approval no.</label><input id="s_iosh_n" type="text" maxlength="40"></div>
+        <div class="field"><label for="s_iosh_l">IOSH logo (optional)</label><input id="s_iosh_l" type="file" accept="image/png,image/jpeg"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="s_osha_t">OSHA Academy wording</label><input id="s_osha_t" type="text" maxlength="80"></div>
+        <div class="field"><label for="s_osha_n">OSHA Academy no.</label><input id="s_osha_n" type="text" maxlength="40"></div>
+        <div class="field"><label for="s_osha_l">OSHA Academy logo (optional)</label><input id="s_osha_l" type="file" accept="image/png,image/jpeg"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="s_acc_def"> Tick both accreditations by default on new certificates</label>
+      <h2 style="margin-top:8px">QR code</h2>
+      <label class="check"><input type="checkbox" id="s_fullid"> Show the full ID / Iqama number inside the QR (otherwise only the last 4 digits)</label>
+      <div class="field" style="max-width:420px"><label for="s_valid">Default validity</label><select id="s_valid"><option value="0">No expiry</option><option value="12">1 year</option><option value="24">2 years</option><option value="36">3 years</option></select></div>
+      <div class="actions"><button class="btn" type="submit">Save settings</button><span id="setMsg" class="spinner"></span></div>
+    </form>
+  </section>
+</main>
+
+<div id="off" class="offscreen" aria-hidden="true"></div>
+
+<script>/*__LIB_QR__*/</script>
+<script>/*__LIB_H2C__*/</script>
+<script>/*__LIB_JSPDF__*/</script>
+<script>
+(function () {
+"use strict";
+var IMG = { logo: "__LOGO__", logoWhite: "__LOGO_WHITE__", seal: "__SEAL__", frame: "__FRAME__",
+            ros: "__ROS__", rosWhite: "__ROS_WHITE__", rosGold: "__ROS_GOLD__" };
+var COURSES = [
+  ["PS-HSE-001", "Flagman / Banksman Training", 8], ["PS-HSE-002", "First Aid Training", 6],
+  ["PS-HSE-003", "Fire Fighting Training", 8], ["PS-HSE-004", "Fire Warden Training", 8],
+  ["PS-HSE-005", "Work at Height Safety", 8], ["PS-HSE-006", "Scaffolding Safety", 8],
+  ["PS-HSE-007", "Confined Space Safety", 8], ["PS-HSE-008", "Permit to Work (PTW)", 8],
+  ["PS-HSE-009", "HSE Induction", 4], ["PS-HSE-010", "Manual Handling", 4],
+  ["PS-HSE-011", "Lifting Operations Safety", 8]
+];
+var DEFAULTS = { center: "Protocol S for Training and Consultancy", contact: "", sig: "", sigt: "Authorized Representative",
+  iosh_t: "IOSH Approved Training Provider", iosh_n: "", iosh_logo: "", osha_t: "OSHA Academy Training Partner", osha_n: "", osha_logo: "",
+  acc_default: false, fullid: false, valid: "24" };
+var S = Object.assign({}, DEFAULTS);
+var current = null;          // record being previewed
+var design = "classic";
+var photoURL = "";
+
+// ---------- helpers ----------
+function $(id) { return document.getElementById(id); }
+function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function d8(iso) { var p = String(iso || "").split("-"); return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]) : null; }
+function fmt(iso) { var d = d8(iso); return d ? d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear() : ""; }
+function range(a, b) {
+  var x = d8(a), y = d8(b); if (!x || !y) return fmt(b);
+  if (a === b) return fmt(a);
+  if (x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth()) return x.getDate() + "–" + y.getDate() + " " + MONTHS[y.getMonth()] + " " + y.getFullYear();
+  if (x.getFullYear() === y.getFullYear()) return x.getDate() + " " + MONTHS[x.getMonth()] + " – " + fmt(b);
+  return fmt(a) + " – " + fmt(b);
+}
+function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function addMonthsMinusDay(isoDate, m) {
+  var d = d8(isoDate); var y = d.getFullYear(), mo = d.getMonth() + m, day = d.getDate();
+  var t = new Date(y, mo + 1, 0); var last = t.getDate();
+  var r = new Date(t.getFullYear(), t.getMonth(), Math.min(day, last)); r.setDate(r.getDate() - 1); return iso(r);
+}
+function hoursTxt(h) { var n = Number(h); return (Math.round(n * 10) / 10).toString(); }
+function plural(h) { return hoursTxt(h) === "1" ? "hour" : "hours"; }
+function nbHyphen(s) { return esc(s).replace(/-/g, "‑"); }
+function fit(len, steps, smallest) { for (var i = 0; i < steps.length; i++) if (len <= steps[i][0]) return steps[i][1]; return smallest; }
+function maskId(id) { id = String(id || ""); return id.length > 4 ? "*".repeat(id.length - 4) + id.slice(-4) : id; }
+function randCode() { var a = new Uint8Array(4); crypto.getRandomValues(a); var h = Array.from(a, function (b) { return b.toString(16).padStart(2, "0"); }).join("").toUpperCase(); return h.slice(0, 4) + "-" + h.slice(4); }
+function today() { return iso(new Date()); }
+
+// ---------- QR ----------
+if (window.qrcode && qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs["UTF-8"]) qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+function qrDataURL(text) {
+  var qr = qrcode(0, "L"); qr.addData(text, "Byte"); qr.make();
+  var n = qr.getModuleCount(), sc = 10, c = document.createElement("canvas");
+  c.width = c.height = n * sc; var g = c.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, c.width, c.height); g.fillStyle = "#0E2240";
+  for (var r = 0; r < n; r++) for (var k = 0; k < n; k++) if (qr.isDark(r, k)) g.fillRect(k * sc, r * sc, sc, sc);
+  return c.toDataURL("image/png");
+}
+function qrText(c) {
+  var L = [S.center.toUpperCase(), "CERTIFICATE OF COMPLETION - VERIFICATION",
+    "Certificate ID: " + c.no, "Name: " + c.name, "ID/Iqama: " + (S.fullid ? c.nid : maskId(c.nid)),
+    "Course: " + c.title + " (" + c.code + ")", "Duration: " + hoursTxt(c.hours) + " hours",
+    "Training dates: " + range(c.start, c.end), "Issue date: " + fmt(c.issued),
+    "Valid until: " + (c.expiry ? fmt(c.expiry) : "No expiry")];
+  if (c.instructor) L.push("Instructor: " + c.instructor);
+  L.push("Check code: " + c.check);
+  return L.join("\n");
+}
+
+// ---------- shared pieces ----------
+function accItems(c) {
+  var out = [];
+  if (c.acc_iosh) out.push({ body: "IOSH", st: S.iosh_t || "IOSH Approved Training Provider", ref: S.iosh_n, logo: S.iosh_logo });
+  if (c.acc_osha) out.push({ body: "OSHAcademy", st: S.osha_t || "OSHA Academy Training Partner", ref: S.osha_n, logo: S.osha_logo });
+  return out;
+}
+function accHTML(items, maxw) {
+  return items.map(function (a) {
+    return '<div class="item"><div class="logo">' + (a.logo ? '<img src="' + a.logo + '" alt="">' : '<div class="word">' + esc(a.body) + '</div>') +
+      '</div><div class="txt"><b>' + esc(a.st) + '</b>' + (a.ref ? '<span>No. ' + esc(a.ref) + '</span>' : '') + '</div></div>';
+  }).join("");
+}
+function sizes(c, accs) {
+  var name = fit(c.name.length, [[20, 32], [26, 28], [34, 24], [44, 21], [60, 18.5]], 16);
+  var course = fit(c.title.length, [[30, 22], [44, 18.5], [64, 16], [100, 14]], 12.5);
+  var compact = name <= 18.5 || course <= 14;
+  if (compact && accs.length) { name -= 1.5; course -= 1; }
+  return { name: name, course: course, compact: compact };
+}
+function statement(c) {
+  return 'conducted by <b>' + esc(S.center) + '</b>, on <b>' + fmt(c.end) + '</b>, with a total duration of <b>' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</b>.';
+}
+function pidLine(c) { return '<div class="pid">ID / Iqama No. <b>' + esc(c.nid) + '</b>' + (c.nationality ? ' · ' + esc(c.nationality) : '') + '</div>'; }
+function sigs(c, mid) {
+  return '<div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
+    (mid || '') +
+    '<div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>';
+}
+function noTxt(c) { return c.no ? esc(c.no) : "Preview – not issued"; }
+
+// ---------- designs ----------
+function classic(c, qr) {
+  var accs = accItems(c), z = sizes(c, accs);
+  return '<div class="d-classic"><div class="sheet" style="--name:' + z.name + 'pt;--course:' + z.course + 'pt">' +
+    '<img class="frame" src="' + IMG.frame + '" alt=""><img class="rosette" src="' + IMG.ros + '" alt="">' +
+    '<div class="content' + (z.compact ? ' compact' : '') + (accs.length ? ' has-acc' : '') + ' qrtext">' +
+    '<div class="brand"><img src="' + IMG.logo + '" alt=""><div class="name">PROTOCOL S</div><div class="desc">FOR TRAINING AND CONSULTANCY</div></div>' +
+    '<div class="title"><div class="t1">CERTIFICATE</div><div class="t2">OF COMPLETION</div><div class="motif"><div class="l"></div><div class="sq"></div><div class="r"></div></div></div>' +
+    '<div class="lead certify">This is to certify that</div><div class="pname">' + nbHyphen(c.name) + '</div><div class="pname-rule"></div>' + pidLine(c) +
+    '<div class="lead" style="margin-top:3.6mm">has successfully completed the training course in</div><div class="course">' + esc(c.title) + '</div>' +
+    '<div class="statement">' + statement(c) + '</div>' +
+    (c.expiry ?
+      '<div class="details five"><div class="cell"><div class="label">Course code</div><div class="val">' + esc(c.code) + '</div></div><div class="cell"><div class="label">Duration</div><div class="val">' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</div></div><div class="cell"><div class="label">Training dates</div><div class="val">' + range(c.start, c.end) + '</div></div><div class="cell w2 first"><div class="label">Date of issue</div><div class="val">' + fmt(c.issued) + '</div></div><div class="cell w2"><div class="label">Valid until</div><div class="val exp">' + fmt(c.expiry) + '</div></div></div>'
+      : '<div class="details"><div class="cell"><div class="label">Course code</div><div class="val">' + esc(c.code) + '</div></div><div class="cell"><div class="label">Duration</div><div class="val">' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</div></div><div class="cell"><div class="label">Training dates</div><div class="val">' + range(c.start, c.end) + '</div></div><div class="cell"><div class="label">Date of issue</div><div class="val">' + fmt(c.issued) + '</div></div></div>') +
+    '<div class="sigs">' + sigs(c, '<div class="seal"><img src="' + IMG.seal + '" alt=""></div>') + '</div>' +
+    (accs.length ? '<div class="acc"><div class="head">APPROVALS &amp; ACCREDITATIONS</div><div class="row">' + accHTML(accs) + '</div></div>' : '') +
+    '<div class="foot"><div class="qrcol"><div class="qr"><img src="' + qr + '" alt=""></div></div>' +
+    '<div class="vtext"><div class="vtitle">VERIFY THIS CERTIFICATE</div><div class="vline">Scan the QR code with any phone camera to display this certificate\'s record. The check code shown in the scan must match the check code printed here.</div></div>' +
+    '<div class="idcol"><div class="label">Certificate ID</div><div class="num">' + noTxt(c) + '</div><div class="meta">Completed: ' + fmt(c.end) + (c.expiry ? '<br>Valid until: ' + fmt(c.expiry) : '') + '<br>Check code: <b class="mono" style="color:#0E2240">' + esc(c.check) + '</b></div></div>' +
+    '<div class="micro">This certificate is recorded by ' + esc(S.center) + ', which can confirm its authenticity on request using the certificate ID and check code.' + (S.contact ? ' · ' + esc(S.contact) : '') + '</div></div>' +
+    '</div></div></div>';
+}
+
+function executive(c, qr) {
+  var accs = accItems(c), z = sizes(c, accs);
+  return '<div class="d-exec"><div class="sheet" style="--name:' + (z.name * 0.95).toFixed(1) + 'pt;--course:' + (z.course * 0.95).toFixed(1) + 'pt">' +
+    '<div class="band"><img class="ros" src="' + IMG.rosWhite + '" alt=""><div class="brand"><img src="' + IMG.logoWhite + '" alt=""><div class="name">PROTOCOL S</div><div class="desc">FOR TRAINING AND CONSULTANCY</div><div class="rule"></div></div>' +
+    '<div class="seal"><img src="' + IMG.seal + '" alt=""></div><div class="qrbox"><img src="' + qr + '" alt=""></div><div class="scan">SCAN TO VERIFY</div>' +
+    '<div class="idl"><div class="lab">CERTIFICATE ID</div><div class="num">' + noTxt(c) + '</div><div class="chk">CHECK ' + esc(c.check) + '</div></div></div><div class="band-edge"></div>' +
+    '<div class="main' + (z.compact ? ' compact' : '') + '"><div class="topbar"></div><div class="t1">CERTIFICATE</div><div class="t2">OF COMPLETION</div>' +
+    '<div class="lead certify">This is to certify that</div><div class="pname">' + nbHyphen(c.name) + '</div><div class="pname-rule"></div>' + pidLine(c) +
+    '<div class="lead" style="margin-top:4mm">has successfully completed the training course in</div><div class="course">' + esc(c.title) + '</div><div class="statement">' + statement(c) + '</div>' +
+    '<div class="details"><div class="cell"><div class="label">Course code</div><div class="val">' + esc(c.code) + '</div></div><div class="cell"><div class="label">Duration</div><div class="val">' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</div></div>' +
+    '<div class="cell"><div class="label">Training dates</div><div class="val">' + range(c.start, c.end) + '</div></div><div class="cell"><div class="label">Date of issue</div><div class="val">' + fmt(c.issued) + '</div></div>' +
+    (c.expiry ? '<div class="cell"><div class="label">Valid until</div><div class="val exp">' + fmt(c.expiry) + '</div></div><div class="cell"><div class="label">Issued by</div><div class="val">PROTOCOL S</div></div>' : '') + '</div>' +
+    (accs.length ? '<div class="acc"><div class="head">APPROVALS &amp; ACCREDITATIONS</div><div class="row">' + accHTML(accs) + '</div></div>' : '') +
+    '<div class="sigs">' + sigs(c) + '</div>' +
+    '<div class="verify">Scan the QR code with any phone camera to display this certificate\'s record; the check code in the scan must match the one printed on this certificate.' + (S.contact ? ' · ' + esc(S.contact) : '') + '</div>' +
+    '</div></div></div>';
+}
+
+function heritage(c, qr) {
+  var accs = accItems(c), z = sizes(c, accs);
+  return '<div class="d-her"><div class="sheet" style="--name:' + z.name + 'pt;--course:' + z.course + 'pt">' +
+    '<div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="cn tl"></div><div class="cn tr"></div><div class="cn bl"></div><div class="cn br"></div>' +
+    '<img class="ros" src="' + IMG.rosGold + '" alt="">' +
+    '<div class="content' + (z.compact ? ' compact' : '') + (accs.length ? ' has-acc' : '') + '">' +
+    '<div class="brand"><div class="seal"><img src="' + IMG.seal + '" alt=""></div><div class="name">PROTOCOL S</div><div class="desc">FOR TRAINING AND CONSULTANCY</div></div>' +
+    '<div class="t1">Certificate of Completion</div><div class="orn"><div class="l"></div><div class="d"></div><div class="r"></div></div>' +
+    '<div class="lead certify">This is to certify that</div><div class="pname">' + nbHyphen(c.name) + '</div><div class="pname-rule"></div>' + pidLine(c) +
+    '<div class="lead" style="margin-top:3.6mm">has successfully completed the training course in</div><div class="course">' + esc(c.title) + '</div><div class="statement">' + statement(c) + '</div>' +
+    '<div class="details' + (c.expiry ? '' : ' four') + '"><div class="cell"><div class="label">Course code</div><div class="val">' + esc(c.code) + '</div></div><div class="cell"><div class="label">Duration</div><div class="val">' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</div></div>' +
+    '<div class="cell"><div class="label">Training dates</div><div class="val">' + range(c.start, c.end) + '</div></div><div class="cell"><div class="label">Date of issue</div><div class="val">' + fmt(c.issued) + '</div></div>' +
+    (c.expiry ? '<div class="cell"><div class="label">Valid until</div><div class="val">' + fmt(c.expiry) + '</div></div>' : '') + '</div>' +
+    (accs.length ? '<div class="acc"><div class="row">' + accHTML(accs) + '</div></div>' : '') +
+    '<div class="sigs">' + sigs(c) + '</div>' +
+    '<div class="foot"><div class="qr"><img src="' + qr + '" alt=""></div><div class="txt"><div class="vt">VERIFY THIS CERTIFICATE</div><div class="vl">Scan the QR code with any phone camera to display this certificate\'s record. The check code must match.</div></div>' +
+    '<div class="idc"><div class="label">Certificate ID</div><div class="num">' + noTxt(c) + '</div><div class="chk">CHECK ' + esc(c.check) + '</div></div></div>' +
+    '</div></div></div>';
+}
+
+function cardFront(c) {
+  var initials = c.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join("").toUpperCase();
+  return '<div class="d-card"><div class="cardp front">' +
+    '<div class="hdr"><img src="' + IMG.logoWhite + '" alt=""><div><div class="bn">PROTOCOL S</div><div class="bd">FOR TRAINING AND CONSULTANCY</div></div><div class="tag">TRAINING CARD</div></div>' +
+    '<div class="gl"></div>' +
+    '<div class="body"><div class="ph">' + (photoURL && current && current._photo ? '<img src="' + photoURL + '" alt="">' : '<span>' + esc(initials) + '</span>') + '</div>' +
+    '<div class="info"><div class="nm" style="font-size:' + fit(c.name.length, [[26, 9.4], [40, 8.2], [60, 7.2]], 6.4) + 'pt">' + nbHyphen(c.name) + '</div>' +
+    '<div class="kv"><span>ID / Iqama</span><b>' + esc(c.nid) + '</b></div>' +
+    '<div class="kv"><span>Course</span><b>' + esc(c.title) + '</b></div>' +
+    '<div class="kv"><span>Card / Cert. No.</span><b class="mono">' + noTxt(c) + '</b></div></div></div>' +
+    '<div class="ft"><div><span>Issued</span><b>' + fmt(c.issued) + '</b></div><div><span>Valid until</span><b>' + (c.expiry ? fmt(c.expiry) : 'No expiry') + '</b></div><div><span>Duration</span><b>' + hoursTxt(c.hours) + ' h</b></div></div>' +
+    '</div></div>';
+}
+function cardBack(c, qr) {
+  var accs = accItems(c);
+  return '<div class="d-card"><div class="cardp back">' +
+    '<div class="qr"><img src="' + qr + '" alt=""></div>' +
+    '<div class="bt"><div class="h">VERIFY THIS CARD</div><p>Scan the QR code to display the training record. The check code must match.</p>' +
+    '<div class="chk">CHECK <b class="mono">' + esc(c.check) + '</b></div>' +
+    '<p class="sm">The holder has completed the training course shown on the front, conducted by ' + esc(S.center) + '.</p>' +
+    (accs.length ? '<div class="acc">' + accs.map(function (a) { return '<span>' + esc(a.st) + (a.ref ? ' · No. ' + esc(a.ref) : '') + '</span>'; }).join("") + '</div>' : '') +
+    (S.contact ? '<p class="sm">' + esc(S.contact) + '</p>' : '') + '</div>' +
+    '<div class="strip"></div></div></div>';
+}
+
+function buildPages(c, which) {
+  var qr = qrDataURL(qrText(c));
+  if (which === "classic") return [classic(c, qr)];
+  if (which === "executive") return [executive(c, qr)];
+  if (which === "heritage") return [heritage(c, qr)];
+  if (which === "card") return [cardFront(c), cardBack(c, qr)];
+}
+
+// ---------- preview ----------
+function readForm(issue) {
+  var sel = $("course").value, code, title;
+  if (sel === "__other") { code = $("ccode").value.trim().toUpperCase(); title = $("ctitle").value.trim(); }
+  else { var co = COURSES[+sel]; code = co[0]; title = co[1]; }
+  var c = { name: $("name").value.trim().replace(/\s+/g, " "), nid: $("nid").value.trim(), nationality: $("nat").value.trim(),
+    company: $("comp").value.trim(), code: code, title: title, hours: Number($("hours").value), start: $("sd").value, end: $("cd").value,
+    validMonths: +$("valid").value, instructor: $("ins").value.trim(), acc_iosh: $("accIosh").checked, acc_osha: $("accOsha").checked };
+  c.issued = today();
+  c.expiry = c.validMonths ? addMonthsMinusDay(c.end || today(), c.validMonths) : "";
+  return c;
+}
+function validate(c) {
+  var e = [];
+  if (!c.name) e.push("Enter the trainee's full name.");
+  if (!c.nid) e.push("Enter the National ID / Iqama number.");
+  else if (!/^[A-Za-z0-9-]{5,20}$/.test(c.nid)) e.push("ID / Iqama number: 5–20 letters or digits.");
+  if (!c.title || !c.code) e.push("Choose a course (or enter the title and code).");
+  if (!(c.hours > 0)) e.push("Enter the duration in hours.");
+  if (!c.start || !c.end) e.push("Enter the start and completion dates.");
+  else if (c.start > c.end) e.push("The start date is after the completion date.");
+  else if (c.end > today()) e.push("The completion date is in the future.");
+  return e;
+}
+function showErr(list) { var b = $("formErr"); b.hidden = !list.length; b.innerHTML = list.map(esc).join("<br>"); }
+
+function renderPreview() {
+  var stage = $("stage");
+  if (!current) { stage.innerHTML = '<div class="empty">Fill in the form to see the certificate.</div>'; return; }
+  var pages = buildPages(current, design);
+  stage.className = "stage" + (design === "card" ? " cardstage" : "") + (current.no ? "" : " unissued");
+  stage.innerHTML = '<div class="scaler">' + pages.join("") + '</div>';
+  fitStage();
+  $("prevTitle").textContent = current.no ? current.no + " — " + current.name : "Preview (not issued)";
+  var issued = !!current.no;
+  ["dlOne", "dlAll"].forEach(function (id) { $(id).disabled = !issued; });
+  $("dlNote").textContent = issued ? "" : "Downloads unlock after you press “Issue certificate & card”.";
+}
+function fitStage() {
+  var stage = $("stage"), sc = stage.querySelector(".scaler"); if (!sc) return;
+  sc.style.transform = "none";
+  var w = sc.scrollWidth, h = sc.scrollHeight, avail = stage.clientWidth - 32;
+  var k = Math.min(1, avail / w);
+  sc.style.transform = "scale(" + k + ")";
+  stage.style.height = (h * k + 32) + "px";
+}
+window.addEventListener("resize", fitStage);
+
+// ---------- PDF ----------
+async function fontsReady() {
+  var list = ['400 12px "Plex Sans"', '500 12px "Plex Sans"', '600 12px "Plex Sans"', '700 12px "Plex Sans"',
+              'italic 500 12px "Plex Serif"', '500 12px "Plex Serif"', '500 12px "Plex Mono"'];
+  try { await Promise.all(list.map(function (f) { return document.fonts.load(f); })); await document.fonts.ready; } catch (e) {}
+}
+async function snap(html) {
+  var off = $("off"); off.innerHTML = html;
+  var node = off.firstElementChild.firstElementChild;
+  var imgs = off.querySelectorAll("img");
+  await Promise.all(Array.from(imgs).map(function (im) { return im.complete ? 1 : new Promise(function (r) { im.onload = im.onerror = r; }); }));
+  await fontsReady();
+  var canvas = await html2canvas(node, { scale: 3, backgroundColor: "#FFFFFF", logging: false, useCORS: true });
+  off.innerHTML = "";
+  return canvas;
+}
+async function pdfFor(c, which) {
+  var J = window.jspdf.jsPDF, pages = buildPages(c, which), doc;
+  if (which === "card") doc = new J({ unit: "mm", format: [85.6, 54], orientation: "landscape" });
+  else doc = new J({ unit: "mm", format: "a4", orientation: "portrait" });
+  for (var i = 0; i < pages.length; i++) {
+    var cv = await snap(pages[i]);
+    if (i > 0) doc.addPage(which === "card" ? [85.6, 54] : "a4", which === "card" ? "landscape" : "portrait");
+    var w = which === "card" ? 85.6 : 210, h = which === "card" ? 54 : 297;
+    doc.addImage(cv.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, w, h, undefined, "FAST");
+  }
+  doc.setProperties({ title: c.no + " " + c.name, subject: "Certificate of Completion", creator: "Protocol S" });
+  return doc;
+}
+function fileBase(c) { return c.no + "_" + c.name.replace(/[^A-Za-z0-9]+/g, "_").slice(0, 40); }
+var dlNS;
+async function saveDoc(doc, name) {
+  if (dlNS === undefined) {
+    dlNS = null;
+    try { if (window.claude && claude.use) dlNS = await Promise.race([claude.use("downloads"), new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })]); } catch (e) { dlNS = null; }
+  }
+  if (dlNS) {
+    try { await dlNS.save({ filename: name, data: doc.output("blob") }); return true; }
+    catch (e) { if (e && e.code === "declined") return false; if (e && e.code === "rate_limited") { await new Promise(function (r) { setTimeout(r, 1500); }); return saveDoc(doc, name); } throw new Error(e && e.message || e.code || e); }
+  }
+  doc.save(name); return true;   // page opened directly in a browser
+}
+async function busy(btn, fn) {
+  var label = btn.textContent; btn.disabled = true; btn.textContent = "Preparing PDF…";
+  try { await fn(); } catch (e) { $("dlNote").textContent = "Could not create the PDF: " + (e && e.message || e); console.error(e); }
+  finally { btn.disabled = false; btn.textContent = label; }
+}
+$("dlOne").addEventListener("click", function () {
+  busy(this, async function () {
+    var doc = await pdfFor(current, design);
+    var ok = await saveDoc(doc, fileBase(current) + "_" + (design === "card" ? "Card" : design.charAt(0).toUpperCase() + design.slice(1)) + ".pdf");
+    $("dlNote").textContent = ok ? "PDF saved." : "Download cancelled.";
+  });
+});
+$("dlAll").addEventListener("click", function () {
+  busy(this, async function () {
+    var J = window.jspdf.jsPDF, doc = new J({ unit: "mm", format: "a4" }), designs = ["classic", "executive", "heritage"];
+    for (var i = 0; i < designs.length; i++) {
+      var cv = await snap(buildPages(current, designs[i])[0]);
+      if (i) doc.addPage("a4", "portrait");
+      doc.addImage(cv.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, 210, 297, undefined, "FAST");
+    }
+    await saveDoc(doc, fileBase(current) + "_Certificates_3_designs.pdf");
+    var card = await pdfFor(current, "card");
+    await saveDoc(card, fileBase(current) + "_Card.pdf");
+    $("dlNote").textContent = "Two files saved: the three certificate designs (3 pages) and the training card (front + back).";
+  });
+});
+
+
+// ---------- storage (artifact database, else this browser) ----------
+var store = {
+  mode: "local", db: null,
+  init: async function () {
+    try {
+      if (window.claude && claude.use) {
+        var db = await Promise.race([claude.use("db"), new Promise(function (r) { setTimeout(function () { r(null); }, 10000); })]);
+        if (db) { this.db = db; this.mode = "db"; }
+      }
+    } catch (e) {}
+    var note = $("storeNote");
+    if (this.mode === "local") { note.hidden = false; note.textContent = "The online register isn't available in this view, so records are saved in this browser only. Open the page from Claude while signed in to use the shared register."; }
+  },
+  lget: function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
+  lset: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  getSettings: async function () {
+    if (this.mode === "db") { var s = await this.db.doc("config/settings").get(); return s.exists ? s.data() : {}; }
+    return this.lget("ps_settings", {});
+  },
+  saveSettings: async function (v) {
+    if (this.mode === "db") return this.db.doc("config/settings").set(v);
+    this.lset("ps_settings", v);
+  },
+  nextNumber: async function (year) {
+    var prefix = "PS-" + year + "-";
+    if (this.mode === "db") {
+      var ref = this.db.doc("config/counter-" + year), holder = "tab-" + Math.random().toString(36).slice(2);
+      for (var t = 0; t < 10; t++) {
+        var lease = await ref.acquire({ holder: holder, ttlMs: 8000 });
+        if (lease.acquired) break;
+        await new Promise(function (r) { setTimeout(r, 900); });
+        if (t === 9) throw new Error("Another issuance is in progress. Try again in a few seconds.");
+      }
+      var snap = await ref.get(), last = snap.exists ? (snap.data().last || 0) : 0, no;
+      do { last += 1; no = prefix + String(last).padStart(6, "0"); } while ((await this.db.doc("certs/" + no).get()).exists);
+      await ref.set({ last: last });
+      return no;
+    }
+    var counters = this.lget("ps_counters", {}), list = this.lget("ps_certs", {}), n = counters[year] || 0, no2;
+    do { n += 1; no2 = prefix + String(n).padStart(6, "0"); } while (list[no2]);
+    counters[year] = n; this.lset("ps_counters", counters); return no2;
+  },
+  saveCert: async function (c) {
+    if (this.mode === "db") return this.db.doc("certs/" + c.no).set(c);
+    var list = this.lget("ps_certs", {}); list[c.no] = c; this.lset("ps_certs", list);
+  },
+  updateCert: async function (no, patch) {
+    if (this.mode === "db") return this.db.doc("certs/" + no).update(patch);
+    var list = this.lget("ps_certs", {}); Object.assign(list[no], patch); this.lset("ps_certs", list);
+  },
+  listCerts: async function () {
+    if (this.mode === "db") { var q = await this.db.collection("certs").orderBy("created_at", "desc").limit(1000).get(); return q.docs.map(function (d) { return d.data(); }); }
+    var list = this.lget("ps_certs", {}); return Object.keys(list).map(function (k) { return list[k]; }).sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });
+  }
+};
+
+// ---------- form wiring ----------
+function fillCourses() {
+  var sel = $("course");
+  sel.innerHTML = COURSES.map(function (c, i) { return '<option value="' + i + '">' + esc(c[0] + " · " + c[1]) + '</option>'; }).join("") + '<option value="__other">Other course…</option>';
+  sel.addEventListener("change", function () {
+    var other = sel.value === "__other"; $("customRow").hidden = !other;
+    if (!other) $("hours").value = COURSES[+sel.value][2];
+    live();
+  });
+  $("hours").value = COURSES[0][2];
+}
+var liveTimer, issuedSig = "", formDirty = false;
+function formSig() { var c = readForm(); delete c.issued; delete c.expiry; return JSON.stringify(c); }
+function live() {
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(function () {
+    var c = readForm();
+    if (!c.name || !c.start || !c.end || !c.title) return;
+    if (current && current.no && (formSig() === issuedSig || issuedSig === "__opened__" && !formDirty)) { renderPreview(); return; }  // keep the issued record
+    c.no = ""; c.check = "XXXX-XXXX"; c._photo = !!photoURL;
+    current = c; renderPreview();
+  }, 350);
+}
+["name", "nid", "nat", "comp", "ctitle", "ccode", "hours", "valid", "sd", "cd", "ins", "accIosh", "accOsha"].forEach(function (id) {
+  $(id).addEventListener("input", function () { formDirty = true; live(); }); $(id).addEventListener("change", live);
+});
+$("photo").addEventListener("change", function () {
+  var f = this.files && this.files[0]; if (!f) { photoURL = ""; live(); return; }
+  var rd = new FileReader();
+  rd.onload = function () {
+    var im = new Image(); im.onload = function () {
+      var c = document.createElement("canvas"), s = Math.min(1, 600 / Math.max(im.width, im.height));
+      c.width = im.width * s; c.height = im.height * s; c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      photoURL = c.toDataURL("image/jpeg", 0.9);
+      if (current) { current._photo = true; renderPreview(); }
+    }; im.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+$("previewBtn").addEventListener("click", function () { showErr(validate(readForm())); live(); });
+document.querySelectorAll("[data-design]").forEach(function (b) {
+  b.addEventListener("click", function () {
+    design = b.dataset.design;
+    document.querySelectorAll("[data-design]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    renderPreview();
+  });
+});
+
+$("f").addEventListener("submit", async function (ev) {
+  ev.preventDefault();
+  clearTimeout(liveTimer);
+  var c = readForm(), errs = validate(c); showErr(errs); if (errs.length) return;
+  var btn = $("issueBtn"); btn.disabled = true; btn.textContent = "Issuing…";
+  try {
+    var all = await store.listCerts();
+    var dup = all.find(function (x) { return x.status !== "revoked" && x.nid === c.nid && x.code === c.code && x.end === c.end; });
+    var key = c.nid + "|" + c.code + "|" + c.end;
+    if (dup && dupOk !== key) { dupOk = key; showErr(["A certificate already exists for ID " + c.nid + " on " + c.code + " (" + dup.no + "). Press “Issue certificate & card” again to issue another one."]); return; }
+    dupOk = "";
+    c.no = await store.nextNumber(new Date().getFullYear());
+    c.check = randCode(); c.status = "valid"; c.created_at = new Date().toISOString();
+    var rec = Object.assign({}, c); delete rec._photo;
+    await store.saveCert(rec);
+    c._photo = !!photoURL; current = c; issuedSig = formSig(); clearTimeout(liveTimer); renderPreview();
+    $("dlNote").textContent = "Issued " + c.no + ". Download the certificate in any design and the training card.";
+    loadRegister();
+  } catch (e) {
+    showErr(["Could not issue: " + (e && (e.message || e.code) || e)]);
+  } finally { btn.disabled = false; btn.textContent = "Issue certificate & card"; }
+});
+
+// ---------- register ----------
+var REG = [], dupOk = "";
+function status(c) { if (c.status === "revoked") return "revoked"; if (c.expiry && c.expiry < today()) return "expired"; return "valid"; }
+function drawRegister() {
+  var q = $("q").value.trim().toLowerCase();
+  var rows = REG.filter(function (c) { return !q || [c.no, c.name, c.nid, c.title, c.code].join(" ").toLowerCase().indexOf(q) >= 0; });
+  $("regBody").innerHTML = rows.length ? rows.map(function (c) {
+    var st = status(c);
+    return '<tr><td class="mono">' + esc(c.no) + '</td><td>' + esc(c.name) + (c.company ? '<div class="hint">' + esc(c.company) + '</div>' : '') + '</td><td class="mono">' + esc(c.nid) + '</td><td>' + esc(c.title) + '<div class="hint">' + esc(c.code) + ' · ' + hoursTxt(c.hours) + ' h</div></td><td>' + fmt(c.end) + '</td><td>' + (c.expiry ? fmt(c.expiry) : '—') + '</td><td class="mono">' + esc(c.check) + '</td><td><span class="badge ' + st + '">' + st + '</span></td>' +
+      '<td><div class="actions"><button class="btn sec sm" data-open="' + esc(c.no) + '">Open</button>' + (c.status !== "revoked" ? '<button class="btn sec sm" data-revoke="' + esc(c.no) + '">Revoke</button>' : '') + '</div></td></tr>';
+  }).join("") : '<tr><td colspan="9" class="hint">No certificates yet.</td></tr>';
+}
+async function loadRegister() {
+  try { REG = await store.listCerts(); drawRegister(); }
+  catch (e) { $("regBody").innerHTML = '<tr><td colspan="9">Could not load the register: ' + esc(e.message || e.code || e) + '</td></tr>'; }
+}
+$("q").addEventListener("input", drawRegister);
+$("rvCancel").addEventListener("click", function () { $("rvBox").hidden = true; });
+$("rvGo").addEventListener("click", async function () {
+  var reason = $("rvReason").value.trim(); if (reason.length < 3) { $("rvReason").focus(); return; }
+  await store.updateCert($("rvNo").textContent, { status: "revoked", revoked_at: new Date().toISOString(), revoke_reason: reason });
+  $("rvBox").hidden = true; loadRegister();
+});
+$("regBody").addEventListener("click", async function (ev) {
+  var o = ev.target.closest("[data-open]"), r = ev.target.closest("[data-revoke]");
+  if (o) { var c = REG.find(function (x) { return x.no === o.dataset.open; }); if (c) { clearTimeout(liveTimer); current = Object.assign({}, c, { _photo: false }); issuedSig = "__opened__"; formDirty = false; tab("new"); renderPreview(); } }
+  if (r) { $("rvNo").textContent = r.dataset.revoke; $("rvReason").value = ""; $("rvBox").hidden = false; $("rvReason").focus(); }
+});
+$("csvBtn").addEventListener("click", function () {
+  var head = ["Certificate ID", "Name", "ID/Iqama", "Nationality", "Company", "Course code", "Course", "Hours", "Start", "Completion", "Issued", "Valid until", "Instructor", "Check code", "Status", "Revoke reason"];
+  var lines = [head].concat(REG.map(function (c) { return [c.no, c.name, c.nid, c.nationality, c.company, c.code, c.title, hoursTxt(c.hours), c.start, c.end, c.issued, c.expiry, c.instructor, c.check, status(c), c.revoke_reason || ""]; }));
+  var csv = "﻿" + lines.map(function (r) { return r.map(function (v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(","); }).join("\n");
+  var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "protocol-s-register.csv"; a.click();
+});
+
+// ---------- settings ----------
+function settingsToForm() {
+  $("s_center").value = S.center; $("s_contact").value = S.contact; $("s_sig").value = S.sig; $("s_sigt").value = S.sigt;
+  $("s_iosh_t").value = S.iosh_t; $("s_iosh_n").value = S.iosh_n; $("s_osha_t").value = S.osha_t; $("s_osha_n").value = S.osha_n;
+  $("s_acc_def").checked = !!S.acc_default; $("s_fullid").checked = !!S.fullid; $("s_valid").value = S.valid || "24";
+  $("accIosh").checked = !!S.acc_default; $("accOsha").checked = !!S.acc_default; $("valid").value = S.valid || "24";
+  $("accIoshLbl").textContent = S.iosh_t + (S.iosh_n ? " · No. " + S.iosh_n : "");
+  $("accOshaLbl").textContent = S.osha_t + (S.osha_n ? " · No. " + S.osha_n : "");
+}
+function readLogo(input) {
+  return new Promise(function (res) {
+    var f = input.files && input.files[0]; if (!f) return res(null);
+    var rd = new FileReader(); rd.onload = function () {
+      var im = new Image(); im.onload = function () {
+        var c = document.createElement("canvas"), s = Math.min(1, 500 / Math.max(im.width, im.height));
+        c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        res(c.toDataURL("image/png"));
+      }; im.onerror = function () { res(null); }; im.src = rd.result;
+    }; rd.readAsDataURL(f);
+  });
+}
+$("sf").addEventListener("submit", async function (ev) {
+  ev.preventDefault();
+  var v = { center: $("s_center").value.trim() || DEFAULTS.center, contact: $("s_contact").value.trim(), sig: $("s_sig").value.trim(), sigt: $("s_sigt").value.trim(),
+    iosh_t: $("s_iosh_t").value.trim(), iosh_n: $("s_iosh_n").value.trim(), osha_t: $("s_osha_t").value.trim(), osha_n: $("s_osha_n").value.trim(),
+    acc_default: $("s_acc_def").checked, fullid: $("s_fullid").checked, valid: $("s_valid").value,
+    iosh_logo: S.iosh_logo, osha_logo: S.osha_logo };
+  var l1 = await readLogo($("s_iosh_l")), l2 = await readLogo($("s_osha_l"));
+  if (l1) v.iosh_logo = l1; if (l2) v.osha_logo = l2;
+  try { await store.saveSettings(v); S = Object.assign({}, DEFAULTS, v); settingsToForm(); $("setMsg").textContent = "Saved."; live(); }
+  catch (e) { $("setMsg").textContent = "Could not save: " + (e.message || e.code || e); }
+});
+
+// ---------- tabs ----------
+function tab(name) {
+  document.querySelectorAll("[data-tab]").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.tab === name)); });
+  document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== name; });
+  if (name === "reg") loadRegister();
+  if (name === "new") setTimeout(fitStage, 30);
+}
+document.querySelectorAll("[data-tab]").forEach(function (b) { b.addEventListener("click", function () { tab(b.dataset.tab); }); });
+
+// ---------- start ----------
+fillCourses();
+$("sd").value = today(); $("cd").value = today();
+settingsToForm();
+renderPreview();
+(async function () {
+  await store.init();
+  try { S = Object.assign({}, DEFAULTS, await store.getSettings()); } catch (e) {}
+  settingsToForm(); live();
+})();
+})();
+</script>
+</body>
+</html>
