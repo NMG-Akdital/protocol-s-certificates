@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ c.certificate_no or "Certificate preview" }} — {{ c.participant_name }}</title>
+<style>
+@font-face { font-family: "Plex Sans"; src: url("fonts/IBMPlexSans-Regular.ttf"); font-weight: 400; }
+@font-face { font-family: "Plex Sans"; src: url("fonts/IBMPlexSans-Medium.ttf"); font-weight: 500; }
+@font-face { font-family: "Plex Sans"; src: url("fonts/IBMPlexSans-SemiBold.ttf"); font-weight: 600; }
+@font-face { font-family: "Plex Sans"; src: url("fonts/IBMPlexSans-Bold.ttf"); font-weight: 700; }
+@font-face { font-family: "Plex Serif"; src: url("fonts/IBMPlexSerif-MediumItalic.ttf"); font-weight: 500; font-style: italic; }
+@font-face { font-family: "Plex Mono"; src: url("fonts/IBMPlexMono-Medium.ttf"); font-weight: 500; }
+@font-face { font-family: "Plex Arabic"; src: url("fonts/IBMPlexSansArabic-Regular.ttf"); font-weight: 400; }
+
+/* EXECUTIVE — navy side band, left-aligned editorial layout */
+@page { size: A4 portrait; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: "Plex Sans", "Plex Arabic", sans-serif; color: #1E2226; width: 210mm; height: 297mm; }
+.sheet { position: relative; width: 210mm; height: 297mm; overflow: hidden; background: #FFFFFF; }
+
+.band { position: absolute; top: 0; left: 0; bottom: 0; width: 58mm; background: #0E2240; color: #FFFFFF; }
+.band-edge { position: absolute; top: 0; bottom: 0; left: 58mm; width: 1.4mm; background: #B08D57; }
+.band .ros { position: absolute; left: -31mm; top: 86mm; width: 120mm; height: 120mm; opacity: 0.09; }
+.band .brand { position: absolute; top: 20mm; left: 10mm; right: 8mm; }
+.band .brand img { width: 18mm; height: 18mm; display: block; }
+.band .brand .name { font-size: 14pt; font-weight: 600; letter-spacing: 0.14em; margin-top: 5mm; line-height: 1; }
+.band .brand .desc { font-size: 6.2pt; letter-spacing: 0.26em; color: #C9CED4; margin-top: 2.6mm; line-height: 1.6; }
+.band .brand .rule { width: 12mm; height: 0.6mm; background: #B08D57; margin-top: 6mm; }
+.band .seal { position: absolute; left: 14mm; bottom: 98mm; width: 30mm; height: 30mm; }
+.band .seal img { width: 30mm; height: 30mm; }
+.band .qrbox { position: absolute; left: 10mm; bottom: 38mm; width: 38mm; height: 38mm; background: #FFFFFF; padding: 2.5mm; }
+.band .qrbox img { width: 33mm; height: 33mm; display: block; }
+.band .qr-placeholder { width: 33mm; height: 33mm; border: 0.4mm dashed #9AA2AC; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 6.2pt; color: #6B7480; padding: 3mm; }
+.band .scan { position: absolute; left: 10mm; right: 6mm; bottom: 31mm; font-size: 6.6pt; letter-spacing: 0.22em; font-weight: 600; color: #C9A86A; }
+.band .idl { position: absolute; left: 10mm; right: 6mm; bottom: 15mm; }
+.band .idl .lab { font-size: 5.8pt; letter-spacing: 0.24em; color: #AEB8C6; }
+.band .idl .num { font-family: "Plex Mono", monospace; font-size: 10.5pt; font-weight: 500; margin-top: 1.2mm; }
+.band .idl .chk { font-family: "Plex Mono", monospace; font-size: 7.4pt; color: #C9A86A; margin-top: 1.6mm; }
+
+.main { position: absolute; top: 24mm; left: 74mm; right: 16mm; bottom: 14mm; }
+.topbar { width: 16mm; height: 1.2mm; background: #B08D57; }
+.t1 { font-size: 38pt; font-weight: 600; letter-spacing: 0.08em; color: #0E2240; line-height: 1; margin-top: 6mm; }
+.t2 { font-size: 11.5pt; font-weight: 600; letter-spacing: 0.46em; color: #7A5C2E; margin-top: 3.6mm; }
+.lead { font-size: 10.8pt; color: #4A5058; }
+.certify { margin-top: 15mm; }
+.pname { font-family: "Plex Serif", "Plex Arabic", serif; font-style: italic; font-weight: 500; color: #0E2240;
+         font-size: {{ (name_pt * 0.95)|round(1) }}pt; line-height: 1.14; margin-top: 3.4mm; }
+.pname-rule { width: 64mm; height: 0.35mm; background: #B08D57; margin-top: 4mm; }
+.course { font-size: {{ (course_pt * 0.95)|round(1) }}pt; font-weight: 600; color: #0E2240; line-height: 1.22; margin-top: 2.8mm; }
+.statement { font-size: 10.2pt; line-height: 1.62; color: #2E3338; margin-top: 4.4mm; }
+.statement b { font-weight: 600; color: #1E2226; }
+
+.details { margin-top: 8mm; display: flex; flex-wrap: wrap; border-top: 0.25mm solid #DDE1E6; }
+.details .cell { width: 50%; padding: 3mm 0 2.8mm 3.4mm; border-bottom: 0.25mm solid #DDE1E6; border-left: 0.8mm solid #B08D57; }
+.label { font-size: 6.2pt; letter-spacing: 0.22em; font-weight: 600; color: #6B7480; text-transform: uppercase; }
+.details .val { font-size: 10pt; font-weight: 600; color: #0E2240; margin-top: 1.1mm; }
+.details .val.exp { color: #7A5C2E; }
+.compact .certify { margin-top: 10mm; } .compact .details { margin-top: 6mm; } .compact .t1 { font-size: 34pt; }
+
+.acc { position: absolute; left: 0; right: 0; bottom: 44mm; }
+.acc .head { font-size: 6pt; letter-spacing: 0.28em; color: #6B7480; font-weight: 600; margin-bottom: 2mm; }
+.acc .row { display: flex; }
+.acc .item { width: 58mm; height: 15mm; margin-right: 4mm; border: 0.3mm solid #D7DBE0; display: flex; align-items: center; padding: 1.4mm 2.6mm; }
+.acc .logo { width: 21mm; height: 11mm; display: flex; align-items: center; justify-content: center; margin-right: 2.4mm; }
+.acc .logo img { max-width: 21mm; max-height: 11mm; }
+.acc .logo .word { font-size: 10.5pt; font-weight: 700; color: #0E2240; text-align: center; line-height: 1.05; }
+.acc .txt { border-left: 0.3mm solid #E1E4E8; padding-left: 2.4mm; }
+.acc .txt b { display: block; font-size: 6.6pt; font-weight: 600; line-height: 1.3; }
+.acc .txt span { display: block; font-size: 6pt; color: #4A5058; margin-top: 0.5mm; font-family: "Plex Mono", monospace; }
+
+.sigs { position: absolute; left: 0; right: 0; bottom: 12mm; display: flex; justify-content: space-between; }
+.sig { width: 55mm; }
+.sig .img { height: 12mm; display: flex; align-items: flex-end; }
+.sig .img img { max-height: 12mm; max-width: 48mm; }
+.sig .line { border-top: 0.3mm solid #2E3338; margin-top: 1mm; padding-top: 1.8mm; }
+.sig .who { font-size: 9.6pt; font-weight: 600; min-height: 4.2mm; }
+.sig .role { font-size: 7.2pt; color: #6B7480; margin-top: 0.8mm; }
+.verify { position: absolute; left: 0; right: 0; bottom: 0; font-size: 6.2pt; color: #8A929C; line-height: 1.5; }
+
+.sample-mark { position: absolute; top: 132mm; left: 10mm; width: 190mm; text-align: center; font-size: 44pt; font-weight: 700;
+               color: rgba(176, 30, 30, 0.10); letter-spacing: 0.12em; transform: rotate(-30deg); }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="band">
+    <img class="ros" src="brand/rosette-white.svg" alt="">
+    <div class="brand">
+      <img src="brand/logo-mark-white.svg" alt="">
+      <div class="name">{{ s.brand_name }}</div>
+      <div class="desc">{{ s.brand_descriptor }}</div>
+      <div class="rule"></div>
+    </div>
+    <div class="seal"><img src="brand/seal.png" alt=""></div>
+    <div class="qrbox">{% if qr %}{% if verify_url %}<a href="{{ verify_url }}">{% endif %}<img src="{{ qr }}" alt="Verification QR code">{% if verify_url %}</a>{% endif %}{% else %}<div class="qr-placeholder">QR code is generated at issuance</div>{% endif %}</div>
+    <div class="scan">SCAN TO VERIFY</div>
+    <div class="idl">
+      <div class="lab">CERTIFICATE ID</div>
+      <div class="num">{{ c.certificate_no or "On issuance" }}</div>
+      {% if check %}<div class="chk">CHECK {{ check }}</div>{% endif %}
+    </div>
+  </div>
+  <div class="band-edge"></div>
+
+  <div class="main{{ ' compact' if compact }}">
+    <div class="topbar"></div>
+    <div class="t1">CERTIFICATE</div>
+    <div class="t2">OF COMPLETION</div>
+
+    <div class="lead certify">This is to certify that</div>
+    <div class="pname">{{ c.participant_name|replace("-", "‑") }}</div>
+    <div class="pname-rule"></div>
+    <div class="lead" style="margin-top: 5mm">has successfully completed the training course in</div>
+    <div class="course">{{ c.course_title }}</div>
+    <div class="statement">conducted by <b>{{ s.center_name }}</b>, on <b>{{ completion }}</b>,
+      with a total duration of <b>{{ hours }} {{ "hour" if hours == "1" else "hours" }}</b>.</div>
+
+    <div class="details">
+      <div class="cell"><div class="label">Course code</div><div class="val">{{ c.course_code }}</div></div>
+      <div class="cell"><div class="label">Duration</div><div class="val">{{ hours }} {{ "hour" if hours == "1" else "hours" }}</div></div>
+      <div class="cell"><div class="label">Training dates</div><div class="val">{{ dates }}</div></div>
+      <div class="cell"><div class="label">Date of issue</div><div class="val">{{ issued or "On issuance" }}</div></div>
+      {% if expiry %}<div class="cell"><div class="label">Valid until</div><div class="val exp">{{ expiry }}</div></div>
+      <div class="cell"><div class="label">Issued by</div><div class="val">{{ s.brand_name }}</div></div>{% endif %}
+    </div>
+
+    {% if accreditations %}
+    <div class="acc">
+      <div class="head">APPROVALS &amp; ACCREDITATIONS</div>
+      <div class="row">
+      {% for a in accreditations[:2] %}
+        <div class="item">
+          <div class="logo">{% if a.logo_uri %}<img src="{{ a.logo_uri }}" alt="{{ a.body }}">{% else %}<div class="word">{{ a.body }}</div>{% endif %}</div>
+          <div class="txt"><b>{{ a.statement }}</b>{% if a.ref %}<span>No. {{ a.ref }}</span>{% endif %}</div>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="sigs">
+      <div class="sig"><div class="img">{% if instructor_sig %}<img src="{{ instructor_sig }}" alt="">{% endif %}</div>
+        <div class="line"><div class="who">{{ c.instructor_name }}</div><div class="role">Instructor / Trainer</div></div></div>
+      <div class="sig"><div class="img">{% if signatory_sig %}<img src="{{ signatory_sig }}" alt="">{% endif %}</div>
+        <div class="line"><div class="who">{{ s.signatory_name }}</div><div class="role">{{ s.signatory_title or "Authorized Representative" }}</div></div></div>
+    </div>
+    <div class="verify">{% if qr_mode == 'text' %}Scan the QR code with any phone camera to display this certificate's record; the check code in the scan must match the one printed on this certificate.{% else %}Verify online at {{ lookup_display }} using the certificate ID, or scan the QR code.{% endif %}{% if s.contact_line %} · {{ s.contact_line }}{% endif %}</div>
+  </div>
+  {% if sample %}<div class="sample-mark">SAMPLE · NOT ISSUED</div>{% endif %}
+</div>
+</body>
+</html>

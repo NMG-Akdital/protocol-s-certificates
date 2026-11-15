@@ -22,6 +22,7 @@ DEFAULTS: dict[str, str] = {
     #   text_link = the details as text + the online verification link
     #   link      = only the online verification link (live status, revocation)
     "qr_mode": os.environ.get("QR_MODE", "text"),
+    "certificate_design": "classic",   # classic | executive | heritage
 }
 
 

@@ -19,6 +19,14 @@
     <div class="field"><label for="sg">Signature image (PNG/JPG, optional)</label><input id="sg" type="file" name="signature" accept="image/png,image/jpeg"><div class="hint">{{ 'A signature image is saved.' if s.signatory_signature_file else 'No image: certificates leave space for a wet signature.' }}</div></div>
   </div>
   {% if s.signatory_signature_file %}<label class="check"><input type="checkbox" name="remove_signature"> Remove the saved signature image</label>{% endif %}
+  <h2 style="margin-top:12px">Certificate design</h2>
+  <div class="field" style="max-width:640px"><label for="cd">Design used for new and regenerated PDFs</label>
+    <select id="cd" name="certificate_design">
+      <option value="classic" {{ 'selected' if s.certificate_design == 'classic' }}>Classic — security border, centred, seal between signatures</option>
+      <option value="executive" {{ 'selected' if s.certificate_design == 'executive' }}>Executive — navy side band with QR, left-aligned</option>
+      <option value="heritage" {{ 'selected' if s.certificate_design == 'heritage' }}>Heritage — ivory paper, gold double border, seal on top</option>
+    </select>
+    <div class="hint">Changing the design never changes certificate data. Use "Preview sample certificate" to compare.</div></div>
   <h2 style="margin-top:12px">QR code on certificates</h2>
   <div class="field" style="max-width:640px"><label for="qm">What the QR code shows when scanned</label>
     <select id="qm" name="qr_mode">

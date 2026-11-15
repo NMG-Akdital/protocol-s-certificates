@@ -478,3 +478,24 @@ def test_text_qr_mode(admin):
     finally:
         with session_scope() as db:
             settings_store.set_many(db, {"qr_mode": "link"})
+
+
+@pytest.mark.parametrize("design", ["classic", "executive", "heritage"])
+def test_all_designs_render_one_page_with_readable_qr(admin, design):
+    from app.services import settings_store
+    from app.services.pdf import render_pdf
+    from app.db import session_scope
+    cid = _course(admin, f"T-DES-{design[:3].upper()}", "Working at Height, Fall Protection Equipment Inspection, "
+                  "Rescue Planning and Scaffolding Safety for Supervisors (Level 2)")
+    c = _issue(admin, "Mohammed Abdulrahman Abdullah Saleh Al-Qahtani Al-Harbi Al-Dosari Al-Shammari Al-Mutairi "
+                      f"Al-Ghamdi {design}", cid)
+    with session_scope() as db:
+        settings_store.set_many(db, {"certificate_design": design, "qr_mode": "text"})
+    try:
+        with SessionLocal() as db:
+            pdf = render_pdf(db.get(Certificate, c.id), settings_store.get_all(db))
+        assert pymupdf.open(stream=pdf, filetype="pdf").page_count == 1
+        assert c.certificate_no in _qr_from_pdf(pdf)
+    finally:
+        with session_scope() as db:
+            settings_store.set_many(db, {"certificate_design": "classic", "qr_mode": "link"})

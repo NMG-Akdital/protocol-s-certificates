@@ -61,7 +61,10 @@ def render_html(cert: Certificate, s: dict[str, str], sample: bool = False,
     compact = name_pt <= 18.5 or course_pt <= 14
     if compact and accs:  # longest names + titles + accreditation row: shrink a little more
         name_pt, course_pt = name_pt - 1.5, course_pt - 1
-    return _env.get_template("pdf/certificate.html").render(
+    design = s.get("certificate_design", "classic")
+    template = {"executive": "pdf/certificate_executive.html",
+                "heritage": "pdf/certificate_heritage.html"}.get(design, "pdf/certificate.html")
+    return _env.get_template(template).render(
         c=cert, s=s, sample=sample or not issued,
         qr=qr,
         verify_url=verification_url(cert) if issued and mode != "text" else "",

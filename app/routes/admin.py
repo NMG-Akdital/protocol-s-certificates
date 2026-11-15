@@ -832,6 +832,8 @@ async def settings_save(request: Request, user: User = Depends(require_admin), d
         updates["center_name"] = settings_store.DEFAULTS["center_name"]
     for key in ("default_allow_public_pdf", "public_full_name_without_key"):
         updates[key] = "1" if form.get(key) == "on" else "0"
+    if form.get("certificate_design") in ("classic", "executive", "heritage"):
+        updates["certificate_design"] = form.get("certificate_design")
     if form.get("qr_mode") in ("text", "text_link", "link"):
         updates["qr_mode"] = form.get("qr_mode")
     sig = form.get("signature")

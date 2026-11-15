@@ -22,9 +22,10 @@ name = os.environ.get("SAMPLE_NAME", "Ahmed Mohamed")
 course_title = os.environ.get("SAMPLE_COURSE", "Flagman / Banksman Training")
 init_db()
 with session_scope() as db:
-    settings_store.set_many(db, {"signatory_name": os.environ.get("SAMPLE_SIGNATORY", "[Authorized Signatory Name]")})
+    settings_store.set_many(db, {"signatory_name": os.environ.get("SAMPLE_SIGNATORY", "[Authorized Signatory Name]"),
+                                 "certificate_design": os.environ.get("SAMPLE_DESIGN", "classic")})
     months = int(os.environ["SAMPLE_VALIDITY_MONTHS"]) if os.environ.get("SAMPLE_VALIDITY_MONTHS") else None
-    p = Participant(full_name=name); c = Course(code="PS-HSE-001", title=course_title, duration_hours=Decimal("8"), validity_months=months)
+    p = Participant(full_name=name); c = Course(code=os.environ.get("SAMPLE_CODE", "PS-HSE-001"), title=course_title, duration_hours=Decimal("8"), validity_months=months)
     # SAMPLE_LOGOS="file.png|Body|Statement|Ref;..." — logo files are copied from paths you provide.
     for spec in filter(None, os.environ.get("SAMPLE_LOGOS", "").split(";")):
         path, body, statement, ref = (spec.split("|") + ["", "", ""])[:4]
@@ -36,8 +37,8 @@ with session_scope() as db:
         db.add(Accreditation(body_name=body, statement=statement, reference_no=ref, logo_file=dest, applies_to_all=True))
     i = Instructor(full_name=os.environ.get("SAMPLE_INSTRUCTOR", "[Instructor Name]"))
     db.add_all([p, c, i]); db.flush()
-    cert = svc.create_draft(db, svc.CertificateInput(participant_id=p.id, course_id=c.id, start_date=date(2026, 11, 10),
-                            completion_date=date(2026, 11, 10), duration_hours=Decimal("8"), instructor_id=i.id), None)
+    cert = svc.create_draft(db, svc.CertificateInput(participant_id=p.id, course_id=c.id, start_date=date.fromisoformat(os.environ.get("SAMPLE_START", "2026-11-10")),
+                            completion_date=date.fromisoformat(os.environ.get("SAMPLE_END", "2026-11-10")), duration_hours=Decimal(os.environ.get("SAMPLE_HOURS", "8")), instructor_id=i.id), None)
     if "--issued" in sys.argv:
         svc.issue(db, cert, None, issue_date=date(2026, 11, 15))
     pdf = render_pdf(cert, settings_store.get_all(db), sample="--issued" not in sys.argv)
