@@ -433,8 +433,8 @@ def test_accreditation_only_on_covered_courses(admin, public):
     c1 = _issue(admin, "Acc Person", covered)
     c2 = _issue(admin, "No Acc Person", other)
     assert "998877" in c1.accreditations_json and c2.accreditations_json == "[]"
-    t1 = pymupdf.open(stream=admin.get(f"/admin/certificates/{c1.id}/pdf").content, filetype="pdf")[0].get_text()
-    t2 = pymupdf.open(stream=admin.get(f"/admin/certificates/{c2.id}/pdf").content, filetype="pdf")[0].get_text()
+    t1 = " ".join(pymupdf.open(stream=admin.get(f"/admin/certificates/{c1.id}/pdf").content, filetype="pdf")[0].get_text().split())
+    t2 = " ".join(pymupdf.open(stream=admin.get(f"/admin/certificates/{c2.id}/pdf").content, filetype="pdf")[0].get_text().split())
     assert "Approved Training Provider" in t1 and "998877" in t1
     assert "Approved Training Provider" not in t2
     assert "998877" in public.get(f"/verify/{c1.certificate_no}?k={c1.verify_token}").text

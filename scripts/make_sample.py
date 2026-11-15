@@ -30,7 +30,9 @@ with session_scope() as db:
         path, body, statement, ref = (spec.split("|") + ["", "", ""])[:4]
         import secrets
         from app.services import files
-        dest = f"logo_{secrets.token_hex(8)}.png"; files.store(dest, Path(path).read_bytes())
+        dest = ""
+        if path:
+            dest = f"logo_{secrets.token_hex(8)}.png"; files.store(dest, Path(path).read_bytes())
         db.add(Accreditation(body_name=body, statement=statement, reference_no=ref, logo_file=dest, applies_to_all=True))
     i = Instructor(full_name=os.environ.get("SAMPLE_INSTRUCTOR", "[Instructor Name]"))
     db.add_all([p, c, i]); db.flush()

@@ -13,91 +13,101 @@
 @font-face { font-family: "Plex Mono"; src: url("fonts/IBMPlexMono-Medium.ttf"); font-weight: 500; }
 @font-face { font-family: "Plex Arabic"; src: url("fonts/IBMPlexSansArabic-Regular.ttf"); font-weight: 400; }
 
-/* A4 portrait */
 @page { size: A4 portrait; margin: 0; }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body { font-family: "Plex Sans", "Plex Arabic", sans-serif; color: #1E2226; width: 210mm; height: 297mm; }
 .sheet { position: relative; width: 210mm; height: 297mm; overflow: hidden; background: #FFFFFF; }
+.frame { position: absolute; top: 0; left: 0; width: 210mm; height: 297mm; }
+.rosette { position: absolute; left: 45mm; top: 88mm; width: 120mm; height: 120mm; opacity: 0.07; }
 
-/* Frame: navy outer rule, gold inner hairline, gold corner squares */
-.frame-outer { position: absolute; top: 8mm; left: 8mm; right: 8mm; bottom: 8mm; border: 1.4mm solid #0E2240; }
-.frame-inner { position: absolute; top: 11.6mm; left: 11.6mm; right: 11.6mm; bottom: 11.6mm; border: 0.3mm solid #B08D57; }
-.corner { position: absolute; width: 2.6mm; height: 2.6mm; background: #B08D57; }
-.c-tl { top: 10.45mm; left: 10.45mm; } .c-tr { top: 10.45mm; right: 10.45mm; }
-.c-bl { bottom: 10.45mm; left: 10.45mm; } .c-br { bottom: 10.45mm; right: 10.45mm; }
+.content { position: absolute; top: 22mm; left: 25mm; right: 25mm; bottom: 19mm; text-align: center; }
 
-.content { position: absolute; top: 22mm; left: 24mm; right: 24mm; bottom: 20mm; text-align: center; }
-.flow { }
-.compact .brand img { width: 16mm; height: 16mm; } .compact .title { margin-top: 8mm; } .compact .title .t1 { font-size: 32pt; } .compact .motif { margin-top: 4.5mm; } .compact .certify { margin-top: 7mm; } .compact .details { margin-top: 5mm; } .compact .statement { margin-top: 3mm; }
+/* header */
+.brand img { width: 17mm; height: 17mm; display: block; margin: 0 auto; }
+.brand .name { font-size: 17pt; font-weight: 600; letter-spacing: 0.14em; padding-left: 0.14em; color: #0E2240; margin-top: 3mm; line-height: 1; }
+.brand .desc { font-size: 6.6pt; font-weight: 500; letter-spacing: 0.36em; padding-left: 0.36em; color: #4A5058; margin-top: 2.2mm; }
 
-.brand img { width: 19mm; height: 19mm; display: block; margin: 0 auto; }
-.brand .name { font-size: 17pt; font-weight: 600; letter-spacing: 0.12em; color: #0E2240; margin-top: 3.2mm; padding-left: 0.12em; line-height: 1; }
-.brand .desc { font-size: 6.6pt; font-weight: 500; letter-spacing: 0.34em; color: #4A5058; margin-top: 2.2mm; padding-left: 0.34em; }
-
-.title { margin-top: 13mm; }
-.title .t1 { font-size: 36pt; font-weight: 600; letter-spacing: 0.16em; padding-left: 0.16em; color: #0E2240; line-height: 1; }
-.title .t2 { font-size: 12.5pt; font-weight: 500; letter-spacing: 0.52em; padding-left: 0.52em; color: #7A5C2E; margin-top: 3.4mm; }
-.motif { margin: 6mm auto 0; width: 54mm; height: 2.2mm; position: relative; }
+.title { margin-top: 10mm; }
+.title .t1 { font-size: 35pt; font-weight: 600; letter-spacing: 0.17em; padding-left: 0.17em; color: #0E2240; line-height: 1; }
+.title .t2 { display: inline-block; margin-top: 3.6mm; padding: 1.4mm 5mm 1.4mm 7mm; background: #0E2240; color: #FFFFFF;
+             font-size: 10.5pt; font-weight: 600; letter-spacing: 0.5em; }
+.motif { margin: 5mm auto 0; width: 54mm; height: 2.2mm; position: relative; }
 .motif .l { position: absolute; top: 0.95mm; left: 0; width: 24mm; height: 0.3mm; background: #B08D57; }
 .motif .r { position: absolute; top: 0.95mm; right: 0; width: 24mm; height: 0.3mm; background: #B08D57; }
 .motif .sq { position: absolute; top: 0; left: 25.9mm; width: 2.2mm; height: 2.2mm; background: #B08D57; }
 
-.lead { font-size: 11pt; color: #4A5058; letter-spacing: 0.02em; }
-.certify { margin-top: 12mm; }
+/* body */
+.lead { font-size: 10.8pt; color: #4A5058; letter-spacing: 0.02em; }
+.certify { margin-top: 9mm; }
 .pname { font-family: "Plex Serif", "Plex Arabic", serif; font-style: italic; font-weight: 500; color: #0E2240;
-         font-size: {{ name_pt }}pt; line-height: 1.14; margin: 4mm auto 0; max-width: 160mm; }
-.pname-rule { width: 118mm; height: 0.3mm; background: #B08D57; margin: 3.4mm auto 0; }
-.course { font-size: {{ course_pt }}pt; font-weight: 600; color: #0E2240; line-height: 1.22; margin: 3mm auto 0; max-width: 158mm; }
-.statement { font-size: 10.5pt; line-height: 1.6; color: #2E3338; margin: 5mm auto 0; max-width: 150mm; }
+         font-size: {{ name_pt }}pt; line-height: 1.14; margin: 3.6mm auto 0; max-width: 158mm; }
+.pname-rule { width: 120mm; height: 0.3mm; background: #B08D57; margin: 3.2mm auto 0; }
+.course { font-size: {{ course_pt }}pt; font-weight: 600; color: #0E2240; line-height: 1.22; margin: 2.8mm auto 0; max-width: 156mm; }
+.statement { font-size: 10.3pt; line-height: 1.6; color: #2E3338; margin: 4.4mm auto 0; max-width: 150mm; }
 .statement b { font-weight: 600; color: #1E2226; }
 
-.details { margin: 9mm auto 0; width: 150mm; display: flex; flex-wrap: wrap; border-top: 0.25mm solid #E1E4E8; }
-.details .cell { width: 50%; padding: 3mm 2mm 2.8mm; border-bottom: 0.25mm solid #E1E4E8; }
-.details .cell:nth-child(odd) { border-right: 0.25mm solid #E1E4E8; }
+.details { margin: 7mm auto 0; width: 152mm; display: flex; flex-wrap: wrap; background: #F6F4EF; border-top: 0.6mm solid #0E2240; }
+.details .cell { width: 50%; padding: 2.8mm 2mm 2.6mm; border-bottom: 0.25mm solid #E3DED3; }
+.details .cell:nth-child(odd) { border-right: 0.25mm solid #E3DED3; }
 .details.five .cell { width: 33.333%; border-right: 0; }
 .details.five .cell.w2 { width: 50%; }
-.details.five .cell + .cell { border-left: 0.25mm solid #E1E4E8; }
+.details.five .cell + .cell { border-left: 0.25mm solid #E3DED3; }
 .details.five .cell.w2.first { border-left: 0; }
+.label { font-size: 6.2pt; letter-spacing: 0.24em; font-weight: 600; color: #6B7480; text-transform: uppercase; }
+.details .val { font-size: 10pt; font-weight: 600; color: #0E2240; margin-top: 1.1mm; }
 .details .val.exp { color: #7A5C2E; }
-.label { font-size: 6.4pt; letter-spacing: 0.24em; font-weight: 600; color: #6B7480; text-transform: uppercase; }
-.details .val { font-size: 10pt; font-weight: 600; color: #0E2240; margin-top: 1.2mm; }
 
-.sigs { position: absolute; left: 0; right: 0; bottom: 41mm; display: flex; justify-content: space-between; }
-.sig { width: 72mm; text-align: center; }
-.sig .img { height: 12mm; display: flex; align-items: flex-end; justify-content: center; }
-.sig .img img { max-height: 12mm; max-width: 58mm; }
-.sig .line { border-top: 0.3mm solid #2E3338; margin-top: 1mm; padding-top: 1.8mm; }
-.sig .who { font-size: 10pt; font-weight: 600; color: #1E2226; min-height: 4.2mm; }
-.sig .role { font-size: 7.6pt; color: #6B7480; margin-top: 0.8mm; letter-spacing: 0.04em; }
+/* compact mode for very long names / course titles, and when the accreditation row is shown */
+.compact .title { margin-top: 8mm; } .compact .title .t1 { font-size: 32pt; } .compact .certify { margin-top: 7mm; }
+.compact .details { margin-top: 5mm; } .compact .statement { margin-top: 3.2mm; }
+.has-acc .brand img { width: 14mm; height: 14mm; } .has-acc .title { margin-top: 6mm; } .has-acc .title .t1 { font-size: 30pt; }
+.has-acc .motif { margin-top: 3.6mm; } .has-acc .certify { margin-top: 5.5mm; } .has-acc .details { margin-top: 5mm; }
+.has-acc .statement { margin-top: 3.2mm; }
+.has-acc.compact .title { margin-top: 5mm; } .has-acc.compact .brand img { width: 12mm; height: 12mm; }
+.has-acc.compact .title .t1 { font-size: 27pt; } .has-acc.compact .certify { margin-top: 4.5mm; }
+.has-acc.compact .motif { margin-top: 3mm; } .has-acc.compact .details { margin-top: 4mm; }
 
+/* signatures + seal */
+.sigs { position: absolute; left: 0; right: 0; bottom: 41mm; display: flex; justify-content: space-between; align-items: flex-end; }
 .has-acc .sigs { bottom: 63mm; }
-.acc { position: absolute; left: 0; right: 0; bottom: 41.5mm; display: flex; justify-content: center; align-items: flex-end; }
-.acc .item { margin: 0 6mm; text-align: center; width: 44mm; }
-.acc .logo { height: 13mm; display: flex; align-items: flex-end; justify-content: center; }
-.acc .logo img { max-height: 13mm; max-width: 40mm; }
-.acc .cap { font-size: 5.8pt; line-height: 1.35; color: #4A5058; margin-top: 1.4mm; }
-.acc .cap b { font-weight: 600; color: #1E2226; }
-.has-acc .brand img { width: 15mm; height: 15mm; } .has-acc .title { margin-top: 7mm; } .has-acc .title .t1 { font-size: 30pt; }
-.has-acc .motif { margin-top: 4mm; } .has-acc .certify { margin-top: 6mm; } .has-acc .details { margin-top: 6mm; }
-.has-acc .statement { margin-top: 3.5mm; }
-.has-acc.compact .title { margin-top: 6mm; } .has-acc.compact .brand img { width: 13mm; height: 13mm; }
-.has-acc.compact .title .t1 { font-size: 28pt; } .has-acc.compact .certify { margin-top: 5mm; }
-.has-acc.compact .motif { margin-top: 3.5mm; } .has-acc.compact .details { margin-top: 5mm; }
-.foot { position: absolute; left: 0; right: 0; bottom: 4mm; display: flex; align-items: flex-end; justify-content: space-between;
-        border-top: 0.25mm solid #E1E4E8; padding-top: 5mm; text-align: left; }
-.qrwrap { display: flex; align-items: center; }
-.qr { width: 28mm; height: 28mm; padding: 2mm; background: #FFFFFF; border: 0.25mm solid #E1E4E8; }
-.qr img { width: 24mm; height: 24mm; display: block; }
-.qr-placeholder { width: 28mm; height: 28mm; border: 0.4mm dashed #9AA2AC; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 6.6pt; color: #6B7480; padding: 3mm; }
-.qrtext { margin-left: 4.5mm; }
-.qrtext .scan { font-size: 9pt; font-weight: 600; color: #0E2240; }
-.qrtext .url { font-size: 7.2pt; color: #4A5058; margin-top: 1.2mm; line-height: 1.45; max-width: 52mm; }
-.idblock { text-align: right; }
-.idblock .num { font-family: "Plex Mono", monospace; font-size: 12.5pt; font-weight: 500; color: #0E2240; margin-top: 1.4mm; letter-spacing: 0.03em; }
-.idblock .meta { font-size: 7.4pt; color: #4A5058; margin-top: 2.2mm; line-height: 1.55; }
+.sig { width: 58mm; text-align: center; }
+.sig .img { height: 12mm; display: flex; align-items: flex-end; justify-content: center; }
+.sig .img img { max-height: 12mm; max-width: 50mm; }
+.sig .line { border-top: 0.3mm solid #2E3338; margin-top: 1mm; padding-top: 1.8mm; }
+.sig .who { font-size: 9.8pt; font-weight: 600; color: #1E2226; min-height: 4.2mm; }
+.sig .role { font-size: 7.4pt; color: #6B7480; margin-top: 0.8mm; letter-spacing: 0.04em; }
+.seal { width: 27mm; height: 27mm; }
+.seal img { width: 27mm; height: 27mm; display: block; }
 
-.micro { position: absolute; left: 0; right: 0; bottom: -5mm; text-align: center; font-size: 6.2pt; color: #8A929C; }
+/* accreditations */
+.acc { position: absolute; left: 0; right: 0; bottom: 39.5mm; text-align: center; }
+.acc .head { font-size: 6pt; letter-spacing: 0.3em; color: #6B7480; font-weight: 600; margin-bottom: 2mm; }
+.acc .row { display: flex; justify-content: center; }
+.acc .item { margin: 0 2.5mm; width: 64mm; height: 16mm; border: 0.3mm solid #D7DBE0; display: flex; align-items: center; padding: 1.6mm 3mm; text-align: left; background: #FFFFFF; }
+.acc .logo { width: 25mm; height: 12mm; display: flex; align-items: center; justify-content: center; margin-right: 3mm; }
+.acc .logo img { max-width: 25mm; max-height: 12mm; }
+.acc .logo .word { font-size: 12pt; font-weight: 700; color: #0E2240; letter-spacing: 0.01em; text-align: center; line-height: 1.05; }
+.acc .txt { border-left: 0.3mm solid #E1E4E8; padding-left: 3mm; }
+.acc .txt b { display: block; font-size: 7pt; font-weight: 600; color: #1E2226; line-height: 1.3; }
+.acc .txt span { display: block; font-size: 6.4pt; color: #4A5058; margin-top: 0.6mm; font-family: "Plex Mono", monospace; }
+
+/* verification panel */
+.foot { position: absolute; left: 0; right: 0; bottom: 3mm; height: 34mm; display: flex; align-items: stretch;
+        background: #F6F4EF; border: 0.3mm solid #E3DED3; text-align: left; }
+.foot .qrcol { width: 34mm; display: flex; align-items: center; justify-content: center; background: #FFFFFF; border-right: 0.3mm solid #E3DED3; }
+.qr { width: 28mm; height: 28mm; padding: 1.8mm; background: #FFFFFF; }
+.qr img { width: 24.4mm; height: 24.4mm; display: block; }
+.qr-placeholder { width: 27mm; height: 27mm; border: 0.4mm dashed #9AA2AC; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 6.4pt; color: #6B7480; padding: 3mm; }
+.foot .vtext { flex: 1; padding: 3.6mm 4.5mm; }
+.foot .vtitle { font-size: 7pt; letter-spacing: 0.26em; font-weight: 700; color: #0E2240; }
+.foot .vline { font-size: 7.4pt; color: #4A5058; margin-top: 1.6mm; line-height: 1.5; }
+.foot .vurl { font-family: "Plex Mono", monospace; font-size: 8pt; color: #0E2240; margin-top: 1.6mm; }
+.foot .vurl a { color: #0E2240; text-decoration: none; }
+.foot .idcol { width: 50mm; padding: 3.6mm 4.5mm; border-left: 0.3mm solid #E3DED3; text-align: right; }
+.foot .num { font-family: "Plex Mono", monospace; font-size: 11.5pt; font-weight: 500; color: #0E2240; margin-top: 1.4mm; letter-spacing: 0.02em; }
+.foot .meta { font-size: 7.2pt; color: #4A5058; margin-top: 2.2mm; line-height: 1.55; }
+.micro { position: absolute; left: 0; right: 0; bottom: -3.6mm; text-align: center; font-size: 5.8pt; color: #8A929C; }
 
 .sample-mark { position: absolute; top: 132mm; left: 10mm; width: 190mm; text-align: center; font-size: 44pt; font-weight: 700;
                color: rgba(176, 30, 30, 0.10); letter-spacing: 0.12em; transform: rotate(-30deg); }
@@ -105,12 +115,10 @@ body { font-family: "Plex Sans", "Plex Arabic", sans-serif; color: #1E2226; widt
 </head>
 <body>
 <div class="sheet">
-  <div class="frame-outer"></div>
-  <div class="frame-inner"></div>
-  <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
+  <img class="frame" src="brand/frame.svg" alt="">
+  <img class="rosette" src="brand/rosette.svg" alt="">
 
   <div class="content{{ ' compact' if compact }}{{ ' has-acc' if accreditations }}">
-   <div class="flow">
     <div class="brand">
       <img src="brand/logo-mark.svg" alt="">
       <div class="name">{{ s.brand_name }}</div>
@@ -126,7 +134,7 @@ body { font-family: "Plex Sans", "Plex Arabic", sans-serif; color: #1E2226; widt
     <div class="lead certify">This is to certify that</div>
     <div class="pname">{{ c.participant_name|replace("-", "‑") }}</div>
     <div class="pname-rule"></div>
-    <div class="lead" style="margin-top: 5mm">has successfully completed the training course in</div>
+    <div class="lead" style="margin-top: 4.4mm">has successfully completed the training course in</div>
     <div class="course">{{ c.course_title }}</div>
     <div class="statement">conducted by <b>{{ s.center_name }}</b>, on <b>{{ completion }}</b>,
       with a total duration of <b>{{ hours }} {{ "hour" if hours == "1" else "hours" }}</b>.</div>
@@ -153,39 +161,43 @@ body { font-family: "Plex Sans", "Plex Arabic", sans-serif; color: #1E2226; widt
         <div class="img">{% if instructor_sig %}<img src="{{ instructor_sig }}" alt="">{% endif %}</div>
         <div class="line"><div class="who">{{ c.instructor_name }}</div><div class="role">Instructor / Trainer</div></div>
       </div>
+      <div class="seal"><img src="brand/seal.png" alt=""></div>
       <div class="sig">
         <div class="img">{% if signatory_sig %}<img src="{{ signatory_sig }}" alt="">{% endif %}</div>
         <div class="line"><div class="who">{{ s.signatory_name }}</div><div class="role">{{ s.signatory_title or "Authorized Representative" }}</div></div>
       </div>
     </div>
-   </div>
 
     {% if accreditations %}
     <div class="acc">
+      <div class="head">APPROVALS &amp; ACCREDITATIONS</div>
+      <div class="row">
       {% for a in accreditations %}
-      <div class="item">
-        <div class="logo">{% if a.logo_uri %}<img src="{{ a.logo_uri }}" alt="{{ a.body }}">{% else %}<b>{{ a.body }}</b>{% endif %}</div>
-        <div class="cap"><b>{{ a.statement }}</b>{% if a.ref %}<br>No. {{ a.ref }}{% endif %}</div>
-      </div>
+        <div class="item">
+          <div class="logo">{% if a.logo_uri %}<img src="{{ a.logo_uri }}" alt="{{ a.body }}">{% else %}<div class="word">{{ a.body }}</div>{% endif %}</div>
+          <div class="txt"><b>{{ a.statement }}</b>{% if a.ref %}<span>No. {{ a.ref }}</span>{% endif %}</div>
+        </div>
       {% endfor %}
+      </div>
     </div>
     {% endif %}
 
     <div class="foot">
-      <div class="qrwrap">
-        {% if qr %}<div class="qr"><img src="{{ qr }}" alt="Verification QR code"></div>
+      <div class="qrcol">
+        {% if qr %}<div class="qr"><a href="{{ verify_url }}"><img src="{{ qr }}" alt="Verification QR code"></a></div>
         {% else %}<div class="qr-placeholder">QR code is generated from the verification link at issuance</div>{% endif %}
-        <div class="qrtext">
-          <div class="scan">Scan to verify</div>
-          <div class="url">or enter the certificate ID at<br>{{ lookup_display }}</div>
-        </div>
       </div>
-      <div class="idblock">
+      <div class="vtext">
+        <div class="vtitle">VERIFY THIS CERTIFICATE</div>
+        <div class="vline">Scan the QR code with any phone camera, or open the link below and enter the certificate ID.</div>
+        <div class="vurl">{% if verify_url %}<a href="{{ verify_url }}">{{ lookup_display }}</a>{% else %}{{ lookup_display }}{% endif %}</div>
+      </div>
+      <div class="idcol">
         <div class="label">Certificate ID</div>
-        <div class="num">{{ c.certificate_no or "Assigned at issuance" }}</div>
-        <div class="meta">Completion date: {{ completion }}{% if expiry %}<br>Valid until: {{ expiry }}{% endif %}</div>
+        <div class="num">{{ c.certificate_no or "On issuance" }}</div>
+        <div class="meta">Completed: {{ completion }}{% if expiry %}<br>Valid until: {{ expiry }}{% endif %}</div>
       </div>
-      <div class="micro">The authenticity and current status of this certificate can be confirmed online at {{ lookup_display }}.{% if s.contact_line %} · {{ s.contact_line }}{% endif %}</div>
+      <div class="micro">This certificate's authenticity and current status are recorded by {{ s.center_name }} and can be confirmed online at any time.{% if s.contact_line %} · {{ s.contact_line }}{% endif %}</div>
     </div>
   </div>
   {% if sample %}<div class="sample-mark">SAMPLE · NOT ISSUED</div>{% endif %}

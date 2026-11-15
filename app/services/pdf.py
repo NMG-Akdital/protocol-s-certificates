@@ -58,6 +58,7 @@ def render_html(cert: Certificate, s: dict[str, str], sample: bool = False,
     return _env.get_template("pdf/certificate.html").render(
         c=cert, s=s, sample=sample or not issued,
         qr=qr,
+        verify_url=verification_url(cert) if issued else "",
         name_pt=name_pt,
         compact=compact,
         course_pt=course_pt,
