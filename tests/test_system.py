@@ -438,6 +438,14 @@ def test_accreditation_only_on_covered_courses(admin, public):
     assert "Approved Training Provider" in t1 and "998877" in t1
     assert "Approved Training Provider" not in t2
     assert "998877" in public.get(f"/verify/{c1.certificate_no}?k={c1.verify_token}").text
+    # Free hosting wipes the disk on restart: logos must come back from the database.
+    from app.config import settings as _s
+    for f in _s.uploads_dir.glob("logo_*.png"):
+        f.unlink()
+    for f in _s.certificates_dir.rglob("*.pdf"):
+        f.unlink()
+    page = pymupdf.open(stream=admin.get(f"/admin/certificates/{c1.id}/pdf").content, filetype="pdf")[0]
+    assert len(page.get_images()) >= 1, "accreditation logo missing after disk wipe"
     # snapshot is protected by the record signature
     assert svc.signature_ok(c1)
     assert admin.get("/admin/accreditations").status_code == 200

@@ -50,6 +50,18 @@ The test certificate is revoked by the test itself, so it can stay in the regist
 > was blocked there. The application itself was tested directly on SQLite and PostgreSQL. Run the
 > acceptance test after your first deployment, as shown above.
 
+## Option B0: free (Render free web service + Neon free PostgreSQL)
+
+`render.yaml` is set up for this. All data lives in PostgreSQL (`DATABASE_URL`), including uploaded
+signature images and logos, so nothing is lost when the free server's disk is wiped. PDFs are regenerated
+from the signed records. Limitation: the free service sleeps after 15 minutes idle, so the first QR scan
+afterwards takes about 30–50 seconds. To remove that, switch the service to a paid instance type.
+
+1. Create a free Neon project (neon.tech) and copy its connection string.
+2. In Render: New → Blueprint → this repository → paste the connection string into `DATABASE_URL`.
+3. Open `https://<service>.onrender.com/setup`, enter `SETUP_TOKEN` (Render → service → Environment),
+   and create the admin account.
+
 ## Option B: a managed platform (Render, Railway, Fly.io)
 
 * Deploy from the Dockerfile.

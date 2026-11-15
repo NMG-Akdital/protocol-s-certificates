@@ -75,7 +75,10 @@ def save_image_upload(upload: UploadFile, prefix: str = "sig") -> str:
     except Exception:
         raise CertificateError("The file is not a valid image")
     name = f"{prefix}_{secrets.token_hex(8)}.png"
-    img.save(settings.uploads_dir / name, format="PNG")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    from ..services import files
+    files.store(name, buf.getvalue())
     return name
 
 
@@ -914,9 +917,8 @@ async def accreditation_save(request: Request, user: User = Depends(require_admi
 
 @router.get("/uploads/{name}")
 def upload_file(name: str, user: User = Depends(require_viewer)):
-    if not re.fullmatch(r"(sig|logo)_[0-9a-f]{16}\.png", name):
-        raise HTTPException(status_code=404)
-    path = settings.uploads_dir / name
-    if not path.exists():
+    from ..services import files
+    path = files.local_path(name)
+    if path is None:
         raise HTTPException(status_code=404)
     return FileResponse(path, media_type="image/png")

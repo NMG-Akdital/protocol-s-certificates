@@ -38,10 +38,9 @@ def course_size(title: str) -> float:
 
 
 def _upload_uri(filename: str | None) -> str | None:
-    if not filename:
-        return None
-    p = (settings.uploads_dir / Path(filename).name)
-    return p.as_uri() if p.exists() else None
+    from .files import local_path
+    p = local_path(filename)
+    return p.as_uri() if p else None
 
 
 def render_html(cert: Certificate, s: dict[str, str], sample: bool = False,

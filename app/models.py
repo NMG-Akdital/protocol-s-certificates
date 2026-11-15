@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, Numeric, String, Table, Text,
-                        UniqueConstraint, Index)
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, Numeric, String, Table,
+                        Text, UniqueConstraint, Index)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -224,3 +224,12 @@ class Setting(Base):
     __tablename__ = "settings"
     key: Mapped[str] = mapped_column(String(80), primary_key=True)
     value: Mapped[str] = mapped_column(Text, default="")
+
+
+class StoredFile(Base):
+    """Uploaded images (signatures, accreditation logos) kept in the database, so they
+    survive on hosts whose disk is wiped on restart. The disk copy is only a cache."""
+    __tablename__ = "stored_files"
+    name: Mapped[str] = mapped_column(String(80), primary_key=True)
+    data: Mapped[bytes] = mapped_column(LargeBinary)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
