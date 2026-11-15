@@ -71,6 +71,67 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
 @page { margin: 0; }
 
 /*__DESIGN_CSS__*/
+
+/* ===== MODERN (A4 landscape) — international training-centre style ===== */
+.d-modern { width: 297mm; height: 210mm; flex: none; background: #fff; box-shadow: 0 2px 10px rgba(14,34,64,.18); }
+.d-modern * { box-sizing: border-box; }
+.d-modern .sheet { position: relative; width: 297mm; height: 210mm; overflow: hidden; background: #FFFFFF; font-family: "Plex Sans", "Plex Arabic", sans-serif; color: #1E2226; line-height: normal; }
+.d-modern .hdr { position: absolute; left: 0; top: 0; right: 0; height: 50mm; background: #0E2240; overflow: hidden; }
+.d-modern .hdr .geo { position: absolute; background: #1A3358; }
+.d-modern .hdr .g1 { right: -10mm; top: -6mm; width: 120mm; height: 16mm; }
+.d-modern .hdr .g2 { right: 98mm; top: 14mm; width: 12mm; height: 12mm; background: #B08D57; }
+.d-modern .hdr .g3 { right: -10mm; top: 14mm; width: 16mm; height: 16mm; }
+.d-modern .hdr .g4 { right: -10mm; top: 34mm; width: 120mm; height: 16mm; }
+.d-modern .hdr .g5 { right: 128mm; top: -6mm; width: 4mm; height: 60mm; background: #142B4C; }
+.d-modern .hdr .brand { position: absolute; left: 18mm; top: 11mm; display: flex; align-items: center; }
+.d-modern .hdr .brand img { width: 15mm; height: 15mm; }
+.d-modern .hdr .brand .bn { color: #fff; font-size: 15pt; font-weight: 600; letter-spacing: .16em; margin-left: 4.5mm; line-height: 1; }
+.d-modern .hdr .brand .bd { color: #C9CED4; font-size: 6.2pt; letter-spacing: .3em; margin: 2mm 0 0 4.5mm; }
+.d-modern .hdr .ttl { position: absolute; left: 18mm; top: 33mm; color: #fff; font-size: 11pt; font-weight: 600; letter-spacing: .5em; }
+.d-modern .hdr .ttl i { font-style: normal; color: #C9A86A; }
+.d-modern .goldline { position: absolute; left: 0; right: 0; top: 50mm; height: 1.4mm; background: #B08D57; }
+.d-modern .seal { position: absolute; right: 37mm; top: 32mm; width: 36mm; height: 36mm; border-radius: 50%; background: #fff; padding: 1.2mm; box-shadow: 0 1mm 3mm rgba(14,34,64,.25); }
+.d-modern .seal img { width: 33.6mm; height: 33.6mm; display: block; }
+.d-modern .left { position: absolute; left: 18mm; top: 62mm; width: 172mm; }
+.d-modern .kick { font-size: 7.4pt; letter-spacing: .3em; font-weight: 700; color: #B08D57; }
+.d-modern .nm { font-size: var(--mname); font-weight: 600; color: #0E2240; line-height: 1.1; margin-top: 3mm; letter-spacing: -.005em; }
+.d-modern .pid { text-align: left; margin-top: 2.4mm; }
+.d-modern .lead { font-size: 10.4pt; color: #4A5058; margin-top: 6mm; }
+.d-modern .crs { font-size: var(--mcourse); font-weight: 600; color: #0E2240; line-height: 1.2; margin-top: 1.6mm; border-left: 1.2mm solid #B08D57; padding-left: 3.4mm; }
+.d-modern .stm { font-size: 9.8pt; line-height: 1.6; color: #2E3338; margin-top: 4mm; max-width: 165mm; }
+.d-modern .stm b { font-weight: 600; color: #1E2226; }
+.d-modern .stats { position: absolute; left: 18mm; top: 143mm; width: 172mm; display: flex; border-top: .3mm solid #DDE1E6; border-bottom: .3mm solid #DDE1E6; }
+.d-modern .stats > div { flex: 1 1 0; padding: 2.8mm 2.6mm; min-width: 0; }
+.d-modern .stats > div.w { flex-grow: 1.45; } .d-modern .stats > div.n { flex-grow: .8; }
+.d-modern .stats .lab, .d-modern .stats .val { white-space: nowrap; }
+.d-modern .stats > div + div { border-left: .3mm solid #DDE1E6; }
+.d-modern .lab { font-size: 5.8pt; letter-spacing: .22em; font-weight: 600; color: #6B7480; text-transform: uppercase; }
+.d-modern .val { font-size: 9pt; font-weight: 600; color: #0E2240; margin-top: 1mm; }
+.d-modern .val.exp { color: #7A5C2E; }
+.d-modern .panel { position: absolute; right: 18mm; top: 74mm; width: 74mm; height: 96mm; background: #F4F6F9; border-radius: 2mm; padding: 6mm 6mm 0; text-align: center; }
+.d-modern .panel .qr { width: 44mm; height: 44mm; margin: 0 auto; background: #fff; padding: 2mm; border-radius: 1mm; }
+.d-modern .panel .qr img { width: 40mm; height: 40mm; display: block; }
+.d-modern .panel .sc { font-size: 6.6pt; letter-spacing: .24em; font-weight: 700; color: #0E2240; margin-top: 3.4mm; }
+.d-modern .panel .hint2 { font-size: 6.4pt; color: #5F6873; margin-top: 1.4mm; line-height: 1.45; }
+.d-modern .panel .no { font-family: "Plex Mono", monospace; font-size: 11pt; font-weight: 500; color: #0E2240; margin-top: 4mm; }
+.d-modern .panel .ck { font-family: "Plex Mono", monospace; font-size: 7.6pt; color: #7A5C2E; margin-top: 1.4mm; letter-spacing: .06em; }
+.d-modern .bottom { position: absolute; left: 18mm; right: 18mm; bottom: 12mm; display: flex; align-items: flex-end; }
+.d-modern .sig { width: 58mm; margin-right: 10mm; }
+.d-modern .sig .img { height: 10mm; }
+.d-modern .sig .line { border-top: .3mm solid #2E3338; padding-top: 1.6mm; }
+.d-modern .sig .who { font-size: 9.4pt; font-weight: 600; min-height: 4.2mm; }
+.d-modern .sig .role { font-size: 7pt; color: #6B7480; margin-top: .6mm; }
+.d-modern .accs { margin-left: auto; display: flex; }
+.d-modern .accs .item { width: 56mm; height: 13mm; margin-left: 3mm; border: .3mm solid #D7DBE0; display: flex; align-items: center; padding: 1.2mm 2.4mm; background: #fff; }
+.d-modern .accs .logo { width: 19mm; height: 10mm; display: flex; align-items: center; justify-content: center; margin-right: 2.2mm; }
+.d-modern .accs .logo img { max-width: 19mm; max-height: 10mm; }
+.d-modern .accs .logo .word { font-size: 10pt; font-weight: 700; color: #0E2240; }
+.d-modern .accs .txt { border-left: .3mm solid #E1E4E8; padding-left: 2.2mm; }
+.d-modern .accs .txt b { display: block; font-size: 6.2pt; font-weight: 600; line-height: 1.3; }
+.d-modern .accs .txt span { display: block; font-size: 5.6pt; color: #4A5058; margin-top: .4mm; font-family: "Plex Mono", monospace; }
+.d-modern .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 6mm; background: #0E2240; color: #AEB8C6; font-size: 5.6pt; letter-spacing: .06em; display: flex; align-items: center; padding: 0 18mm; }
+.d-modern .foot span { margin-left: auto; color: #C9A86A; }
+
 </style>
 </head>
 <body>
@@ -138,12 +199,13 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
             <button type="button" data-design="classic" aria-pressed="true">Classic</button>
             <button type="button" data-design="executive" aria-pressed="false">Executive</button>
             <button type="button" data-design="heritage" aria-pressed="false">Heritage</button>
+            <button type="button" data-design="modern" aria-pressed="false">Modern (landscape)</button>
             <button type="button" data-design="card" aria-pressed="false">Training card</button>
           </div>
           <div id="stage" class="stage"><div class="empty">Fill in the form to see the certificate.</div></div>
           <div class="actions" style="margin-top:14px" id="dlRow">
             <button class="btn" type="button" id="dlOne">Download PDF</button>
-            <button class="btn sec" type="button" id="dlAll">Download all (3 certificates + card)</button>
+            <button class="btn sec" type="button" id="dlAll">Download all (4 certificates + card)</button>
           </div>
           <p class="meta" id="dlNote"></p>
         </div>
@@ -370,6 +432,34 @@ function heritage(c, qr) {
     '</div></div></div>';
 }
 
+
+function modern(c, qr) {
+  var accs = accItems(c);
+  var nm = fit(c.name.length, [[22, 30], [30, 26], [40, 22], [55, 18]], 15);
+  var cr = fit(c.title.length, [[35, 18], [55, 15.5], [80, 13.5]], 12);
+  return '<div class="d-modern"><div class="sheet" style="--mname:' + nm + 'pt;--mcourse:' + cr + 'pt">' +
+    '<div class="hdr"><div class="geo g1"></div><div class="geo g2"></div><div class="geo g3"></div><div class="geo g4"></div><div class="geo g5"></div>' +
+    '<div class="brand"><img src="' + IMG.logoWhite + '" alt=""><div><div class="bn">PROTOCOL S</div><div class="bd">FOR TRAINING AND CONSULTANCY</div></div></div>' +
+    '<div class="ttl">CERTIFICATE <i>OF COMPLETION</i></div></div><div class="goldline"></div>' +
+    '<div class="seal"><img src="' + IMG.seal + '" alt=""></div>' +
+    '<div class="left"><div class="kick">THIS IS TO CERTIFY THAT</div><div class="nm">' + nbHyphen(c.name) + '</div>' + pidLine(c) +
+    '<div class="lead">has successfully completed the training course</div><div class="crs">' + esc(c.title) + '</div>' +
+    '<div class="stm">' + statement(c) + '</div></div>' +
+    '<div class="stats"><div><div class="lab">Course code</div><div class="val">' + esc(c.code) + '</div></div>' +
+    '<div class="n"><div class="lab">Duration</div><div class="val">' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</div></div>' +
+    '<div class="w"><div class="lab">Training dates</div><div class="val">' + range(c.start, c.end) + '</div></div>' +
+    '<div class="w"><div class="lab">Date of issue</div><div class="val">' + fmt(c.issued) + '</div></div>' +
+    '<div class="w"><div class="lab">Valid until</div><div class="val exp">' + (c.expiry ? fmt(c.expiry) : 'No expiry') + '</div></div></div>' +
+    '<div class="panel"><div class="qr"><img src="' + qr + '" alt=""></div><div class="sc">SCAN TO VERIFY</div>' +
+    '<div class="hint2">Any phone camera shows this certificate\'s record. The check code must match.</div>' +
+    '<div class="no">' + noTxt(c) + '</div><div class="ck">CHECK ' + esc(c.check) + '</div></div>' +
+    '<div class="bottom"><div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
+    '<div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>' +
+    (accs.length ? '<div class="accs">' + accHTML(accs) + '</div>' : '') + '</div>' +
+    '<div class="foot">' + esc(S.center) + (S.contact ? ' · ' + esc(S.contact) : '') + '<span>' + noTxt(c) + '</span></div>' +
+    '</div></div>';
+}
+
 function cardFront(c) {
   var initials = c.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join("").toUpperCase();
   return '<div class="d-card"><div class="cardp front">' +
@@ -400,6 +490,7 @@ function buildPages(c, which) {
   if (which === "classic") return [classic(c, qr)];
   if (which === "executive") return [executive(c, qr)];
   if (which === "heritage") return [heritage(c, qr)];
+  if (which === "modern") return [modern(c, qr)];
   if (which === "card") return [cardFront(c), cardBack(c, qr)];
 }
 
@@ -469,12 +560,13 @@ async function snap(html) {
 }
 async function pdfFor(c, which) {
   var J = window.jspdf.jsPDF, pages = buildPages(c, which), doc;
+  var land = which === "modern";
   if (which === "card") doc = new J({ unit: "mm", format: [85.6, 54], orientation: "landscape" });
-  else doc = new J({ unit: "mm", format: "a4", orientation: "portrait" });
+  else doc = new J({ unit: "mm", format: "a4", orientation: land ? "landscape" : "portrait" });
   for (var i = 0; i < pages.length; i++) {
     var cv = await snap(pages[i]);
     if (i > 0) doc.addPage(which === "card" ? [85.6, 54] : "a4", which === "card" ? "landscape" : "portrait");
-    var w = which === "card" ? 85.6 : 210, h = which === "card" ? 54 : 297;
+    var w = which === "card" ? 85.6 : (land ? 297 : 210), h = which === "card" ? 54 : (land ? 210 : 297);
     doc.addImage(cv.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, w, h, undefined, "FAST");
   }
   doc.setProperties({ title: c.no + " " + c.name, subject: "Certificate of Completion", creator: "Protocol S" });
@@ -507,16 +599,16 @@ $("dlOne").addEventListener("click", function () {
 });
 $("dlAll").addEventListener("click", function () {
   busy(this, async function () {
-    var J = window.jspdf.jsPDF, doc = new J({ unit: "mm", format: "a4" }), designs = ["classic", "executive", "heritage"];
+    var J = window.jspdf.jsPDF, doc = new J({ unit: "mm", format: "a4" }), designs = ["classic", "executive", "heritage", "modern"];
     for (var i = 0; i < designs.length; i++) {
-      var cv = await snap(buildPages(current, designs[i])[0]);
-      if (i) doc.addPage("a4", "portrait");
-      doc.addImage(cv.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, 210, 297, undefined, "FAST");
+      var cv = await snap(buildPages(current, designs[i])[0]), land = designs[i] === "modern";
+      if (i) doc.addPage("a4", land ? "landscape" : "portrait");
+      doc.addImage(cv.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, land ? 297 : 210, land ? 210 : 297, undefined, "FAST");
     }
-    await saveDoc(doc, fileBase(current) + "_Certificates_3_designs.pdf");
+    await saveDoc(doc, fileBase(current) + "_Certificates_4_designs.pdf");
     var card = await pdfFor(current, "card");
     await saveDoc(card, fileBase(current) + "_Card.pdf");
-    $("dlNote").textContent = "Two files saved: the three certificate designs (3 pages) and the training card (front + back).";
+    $("dlNote").textContent = "Two files saved: the four certificate designs (4 pages) and the training card (front + back).";
   });
 });
 

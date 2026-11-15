@@ -44,7 +44,7 @@ with sync_playwright() as p:
     page.click("#issueBtn")
     page.wait_for_function("document.getElementById('prevTitle').textContent.startsWith('PS-')", timeout=15000)
     print("issued:", page.inner_text("#prevTitle"))
-    for d in ["classic", "executive", "heritage", "card"]:
+    for d in ["classic", "executive", "heritage", "modern", "card"]:
         page.click(f"[data-design={d}]")
         page.wait_for_timeout(500)
         page.locator("#stage").screenshot(path=str(OUT / f"preview-{d}.png"))
