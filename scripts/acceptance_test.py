@@ -174,7 +174,7 @@ def main():
         port = free_port()
         base = f"http://127.0.0.1:{port}"
         env = dict(os.environ, DATA_DIR=tmp, DATABASE_URL=f"sqlite:///{tmp}/accept.db", APP_ENV="development",
-                   PUBLIC_BASE_URL=base, ADMIN_PASSWORD="Acceptance2026!x")
+                   PUBLIC_BASE_URL=base, ADMIN_PASSWORD="Acceptance2026!x", QR_MODE="link")
         subprocess.run([sys.executable, str(ROOT / "scripts/create_admin.py"), "acceptance@local.test", "Acceptance Admin"],
                        env=env, check=True, capture_output=True)
         proc = subprocess.Popen([sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(port)], cwd=ROOT, env=env,

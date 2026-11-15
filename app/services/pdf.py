@@ -12,8 +12,8 @@ from weasyprint import HTML
 
 from ..config import APP_DIR, settings
 from ..models import Certificate
-from .certificates import (accreditations_of, format_date, format_range, hours_display, public_lookup_url,
-                           verification_url)
+from .certificates import (accreditations_of, check_code, format_date, format_range, hours_display,
+                           public_lookup_url, qr_text, verification_url)
 from .qr import qr_svg_data_uri
 
 _env = Environment(loader=FileSystemLoader(str(APP_DIR / "templates")),
@@ -48,7 +48,13 @@ def render_html(cert: Certificate, s: dict[str, str], sample: bool = False,
     issued = cert.status in ("issued", "revoked") and cert.certificate_no
     accs = accreditations_of(cert) if issued else (accreditations or [])
     accs = [dict(a, logo_uri=_upload_uri(a.get("logo"))) for a in accs][:4]
-    qr = qr_svg_data_uri(verification_url(cert)) if issued else None
+    mode = s.get("qr_mode", "text")
+    if not issued:
+        qr = None
+    elif mode == "link":
+        qr = qr_svg_data_uri(verification_url(cert))
+    else:
+        qr = qr_svg_data_uri(qr_text(cert, s.get("center_name", ""), include_link=(mode == "text_link")), error="l")
     lookup = urlparse(public_lookup_url())
     instructor_sig = _upload_uri(cert.instructor.signature_file) if cert.instructor else None
     name_pt, course_pt = name_size(cert.participant_name), course_size(cert.course_title)
@@ -58,7 +64,9 @@ def render_html(cert: Certificate, s: dict[str, str], sample: bool = False,
     return _env.get_template("pdf/certificate.html").render(
         c=cert, s=s, sample=sample or not issued,
         qr=qr,
-        verify_url=verification_url(cert) if issued else "",
+        verify_url=verification_url(cert) if issued and mode != "text" else "",
+        qr_mode=mode,
+        check=check_code(cert) if issued else "",
         name_pt=name_pt,
         compact=compact,
         course_pt=course_pt,

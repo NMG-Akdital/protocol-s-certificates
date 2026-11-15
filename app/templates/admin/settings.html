@@ -19,6 +19,14 @@
     <div class="field"><label for="sg">Signature image (PNG/JPG, optional)</label><input id="sg" type="file" name="signature" accept="image/png,image/jpeg"><div class="hint">{{ 'A signature image is saved.' if s.signatory_signature_file else 'No image: certificates leave space for a wet signature.' }}</div></div>
   </div>
   {% if s.signatory_signature_file %}<label class="check"><input type="checkbox" name="remove_signature"> Remove the saved signature image</label>{% endif %}
+  <h2 style="margin-top:12px">QR code on certificates</h2>
+  <div class="field" style="max-width:640px"><label for="qm">What the QR code shows when scanned</label>
+    <select id="qm" name="qr_mode">
+      <option value="text" {{ 'selected' if s.qr_mode == 'text' }}>Certificate details as text (works on any phone, no website needed)</option>
+      <option value="text_link" {{ 'selected' if s.qr_mode == 'text_link' }}>Details as text + online verification link</option>
+      <option value="link" {{ 'selected' if s.qr_mode == 'link' }}>Online verification link only (live status: valid / expired / revoked)</option>
+    </select>
+    <div class="hint">Text mode shows the details as printed; it can't reflect a later revocation. Each certificate carries a check code that only this system can produce.</div></div>
   <h2 style="margin-top:12px">Public verification page</h2>
   <label class="check"><input type="checkbox" name="default_allow_public_pdf" {{ 'checked' if s.default_allow_public_pdf == '1' }}> New certificates allow PDF viewing from the verification page (QR link only)</label>
   <label class="check"><input type="checkbox" name="public_full_name_without_key" {{ 'checked' if s.public_full_name_without_key == '1' }}> Show the full participant name when someone types the ID manually (without the QR code)</label>

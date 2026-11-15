@@ -46,6 +46,7 @@
   <h2>Verification</h2>
   <dl class="kv">
     <dt>QR link</dt><dd class="mono small" style="overflow-wrap:anywhere"><a href="{{ verify_url }}" target="_blank" rel="noopener">{{ verify_url }}</a></dd>
+    <dt>Check code</dt><dd class="mono">{{ check }}</dd>
     <dt>Record signature</dt><dd>{% if sig_ok %}<span class="badge b-ok">intact</span>{% else %}<span class="badge b-error">mismatch</span>{% endif %}</dd>
     <dt>Public PDF</dt><dd>{{ 'Allowed (QR link only)' if c.allow_public_pdf else 'Not allowed' }}
       {% if can('admin') and c.status == 'issued' %}<form method="post" action="/admin/certificates/{{ c.id }}/public-pdf" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="enabled" value="{{ '0' if c.allow_public_pdf else '1' }}"><button class="btn secondary small" type="submit">{{ 'Disable' if c.allow_public_pdf else 'Allow' }}</button></form>{% endif %}</dd>

@@ -322,3 +322,32 @@ def format_range(a: date, b: date) -> str:
     if a.year == b.year:
         return f"{a.day} {a.strftime('%B')} – {format_date(b)}"
     return f"{format_date(a)} – {format_date(b)}"
+
+
+def check_code(cert: Certificate) -> str:
+    """Short code printed on the certificate and inside its QR text. Only the center (holding
+    CERT_SIGNING_KEY) can produce it, so a forged QR with made-up details won't match."""
+    if not cert.certificate_no:
+        return ""
+    raw = hmac.new(settings.cert_signing_key.encode(), b"check:" + _canonical(cert), hashlib.sha256).hexdigest()
+    return f"{raw[:4]}-{raw[4:8]}".upper()
+
+
+def qr_text(cert: Certificate, center: str, include_link: bool = False) -> str:
+    lines = [
+        center.upper(),
+        "CERTIFICATE OF COMPLETION - VERIFICATION",
+        f"Certificate ID: {cert.certificate_no}",
+        f"Name: {cert.participant_name}",
+        f"Course: {cert.course_title} ({cert.course_code})",
+        f"Duration: {hours_display(cert.duration_hours)} hours",
+        f"Training dates: {format_range(cert.start_date, cert.completion_date)}",
+        f"Issue date: {format_date(cert.issue_date)}",
+        f"Valid until: {format_date(cert.expiry_date) if cert.expiry_date else 'No expiry'}",
+    ]
+    if cert.instructor_name and cert.show_instructor_public:
+        lines.append(f"Instructor: {cert.instructor_name}")
+    lines.append(f"Check code: {check_code(cert)}")
+    if include_link:
+        lines.append(f"Verify online: {verification_url(cert)}")
+    return "\n".join(lines)

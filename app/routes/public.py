@@ -100,6 +100,7 @@ def verify(certificate_no: str, request: Request, k: str | None = None, m: str |
             "instructor": cert.instructor_name if cert.show_instructor_public else "",
             "expiry": svc.format_date(cert.expiry_date) if cert.expiry_date else "",
             "accreditations": svc.accreditations_of(cert),
+            "check": svc.check_code(cert),
             "replacement": replacement,
             "pdf_link": (f"/verify/{cert.certificate_no}/certificate.pdf?k={cert.verify_token}"
                          if result == "VALID" and with_key and cert.allow_public_pdf else None),

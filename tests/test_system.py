@@ -456,3 +456,25 @@ def test_setup_page_closed_once_users_exist(public):
     assert public.get("/setup").status_code == 404
     assert public.post("/setup", data={"email": "x@y.z", "full_name": "x", "password": "Aa1aaaaaaaaaa",
                                        "confirm": "Aa1aaaaaaaaaa"}).status_code in (400, 404)
+
+
+def test_text_qr_mode(admin):
+    from app.services import settings_store
+    from app.db import session_scope
+    cid = _course(admin, "T-TXT-01", "Text QR Course")
+    c = _issue(admin, "Text Qr Person", cid)
+    with session_scope() as db:
+        settings_store.set_many(db, {"qr_mode": "text"})
+    try:
+        with SessionLocal() as db:  # regenerate (archived PDF was made in link mode)
+            from app.services.pdf import render_pdf
+            cert = db.get(Certificate, c.id)
+            pdf = render_pdf(cert, settings_store.get_all(db))
+        txt = _qr_from_pdf(pdf)
+        assert "Name: Text Qr Person" in txt and "Text QR Course" in txt
+        assert f"Certificate ID: {c.certificate_no}" in txt
+        assert f"Check code: {svc.check_code(c)}" in txt and "http" not in txt
+        assert svc.check_code(c) in " ".join(pymupdf.open(stream=pdf, filetype="pdf")[0].get_text().split())
+    finally:
+        with session_scope() as db:
+            settings_store.set_many(db, {"qr_mode": "link"})

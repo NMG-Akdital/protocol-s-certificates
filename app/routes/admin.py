@@ -238,6 +238,7 @@ def cert_detail(cid: int, request: Request, user: User = Depends(require_viewer)
         "verify_url": svc.verification_url(cert) if cert.certificate_no else None,
         "sig_ok": svc.signature_ok(cert) if cert.certificate_no else None,
         "expired": svc.is_expired(cert),
+        "check": svc.check_code(cert),
         "accs": svc.accreditations_of(cert) if cert.certificate_no else svc.accreditations_for(db, cert.course_id),
     }, user=user)
 
@@ -831,6 +832,8 @@ async def settings_save(request: Request, user: User = Depends(require_admin), d
         updates["center_name"] = settings_store.DEFAULTS["center_name"]
     for key in ("default_allow_public_pdf", "public_full_name_without_key"):
         updates[key] = "1" if form.get(key) == "on" else "0"
+    if form.get("qr_mode") in ("text", "text_link", "link"):
+        updates["qr_mode"] = form.get("qr_mode")
     sig = form.get("signature")
     try:
         if sig is not None and getattr(sig, "filename", ""):

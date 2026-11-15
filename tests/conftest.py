@@ -10,6 +10,7 @@ _tmp = tempfile.mkdtemp(prefix="ps-test-")
 os.environ["DATA_DIR"] = _tmp
 os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL") or f"sqlite:///{_tmp}/test.db"
 os.environ["APP_ENV"] = "development"
+os.environ["QR_MODE"] = "link"
 os.environ["PUBLIC_BASE_URL"] = "http://testserver"
 os.environ["VERIFY_RATE_LIMIT_PER_MINUTE"] = "10000"
 os.environ["LOGIN_RATE_LIMIT_PER_MINUTE"] = "10000"

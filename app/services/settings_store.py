@@ -1,6 +1,8 @@
 """Center-level settings editable from the admin dashboard (stored in the DB)."""
 from __future__ import annotations
 
+import os
+
 from sqlalchemy.orm import Session
 
 from ..models import Setting
@@ -15,6 +17,11 @@ DEFAULTS: dict[str, str] = {
     "contact_line": "",            # e.g. website or email shown in certificate footer (optional)
     "default_allow_public_pdf": "0",
     "public_full_name_without_key": "0",  # show full name when the ID is typed manually (no QR key)
+    # What the QR code contains:
+    #   text      = the certificate details as text (works offline, no website needed)
+    #   text_link = the details as text + the online verification link
+    #   link      = only the online verification link (live status, revocation)
+    "qr_mode": os.environ.get("QR_MODE", "text"),
 }
 
 

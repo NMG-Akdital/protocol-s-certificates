@@ -35,6 +35,7 @@
         {% if expiry %}<div><span>Valid until</span><b>{{ expiry }}</b></div>{% endif %}
         {% if instructor %}<div><span>Instructor</span><b>{{ instructor }}</b></div>{% endif %}
         <div><span>Issuing organization</span><b>{{ s.center_name }}</b></div>
+        <div><span>Check code</span><b class="mono">{{ check }}</b></div>
         <div><span>Status</span><b>{{ {'VALID': 'Valid', 'REVOKED': 'Revoked', 'EXPIRED': 'Expired'}[result] }}</b></div>
         {% for a in accreditations %}<div><span>{{ a.body }}</span><b>{{ a.statement }}{% if a.ref %} · No. {{ a.ref }}{% endif %}</b></div>{% endfor %}
       </div>
