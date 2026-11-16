@@ -62,7 +62,12 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
 .badge.revoked { background: #FBEAE8; color: var(--err); } .badge.expired { background: #FFF4DE; color: #8A5A00; }
 .offscreen { position: fixed; left: -20000px; top: 0; }
 .spinner { font-size: 13px; color: var(--steel); }
-#printArea { display: none; }
+.sigpad { border: 1px dashed #9AA2AC; background: #fff; border-radius: 3px; touch-action: none; width: 100%; max-width: 520px; aspect-ratio: 3 / 1; display: block; cursor: crosshair; }
+.sigprev { height: 56px; max-width: 220px; object-fit: contain; background: repeating-conic-gradient(#F1F3F5 0 25%, #fff 0 50%) 0 0 / 12px 12px; border: 1px solid var(--line); padding: 4px; }
+.sigrow { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF0F3; }
+.sigrow .nm2 { flex: 1 1 180px; font-weight: 600; }
+.modal { position: fixed; inset: 0; background: rgba(14,34,64,.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+.modal .box { background: #fff; width: 100%; max-width: 600px; padding: 20px; border-radius: 4px; }
 @media print {
   body > *:not(#printArea) { display: none !important; }
   #printArea { display: block; }
@@ -117,7 +122,8 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
 .d-modern .panel .ck { font-family: "Plex Mono", monospace; font-size: 7.6pt; color: #7A5C2E; margin-top: 1.4mm; letter-spacing: .06em; }
 .d-modern .bottom { position: absolute; left: 18mm; right: 18mm; bottom: 12mm; display: flex; align-items: flex-end; }
 .d-modern .sig { width: 58mm; margin-right: 10mm; }
-.d-modern .sig .img { height: 10mm; }
+.d-modern .sig .img { height: 12mm; display: flex; align-items: flex-end; }
+.d-modern .sig .img img { max-height: 12mm; max-width: 52mm; }
 .d-modern .sig .line { border-top: .3mm solid #2E3338; padding-top: 1.6mm; }
 .d-modern .sig .who { font-size: 9.4pt; font-weight: 600; min-height: 4.2mm; }
 .d-modern .sig .role { font-size: 7pt; color: #6B7480; margin-top: .6mm; }
@@ -177,7 +183,7 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
             <div class="field"><label for="sd">Start date</label><input id="sd" type="date" required></div>
             <div class="field"><label for="cd">Completion date</label><input id="cd" type="date" required></div>
           </div>
-          <div class="field"><label for="ins">Instructor / Trainer</label><input id="ins" type="text" maxlength="80" placeholder="Eng. Khaled Mansour"></div>
+          <div class="field"><label for="ins">Instructor / Trainer</label><input id="ins" type="text" maxlength="80" placeholder="Eng. Khaled Mansour" list="insNames"><datalist id="insNames"></datalist><div class="hint" id="insSigNote"></div></div>
           <div class="field"><label>Accreditations on this certificate</label>
             <label class="check"><input type="checkbox" id="accIosh"> <span id="accIoshLbl">IOSH</span></label>
             <label class="check"><input type="checkbox" id="accOsha"> <span id="accOshaLbl">OSHA Academy</span></label>
@@ -259,7 +265,17 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
         <div class="field"><label for="s_osha_l">OSHA Academy logo (optional)</label><input id="s_osha_l" type="file" accept="image/png,image/jpeg"></div>
       </div>
       <label class="check"><input type="checkbox" id="s_acc_def"> Tick both accreditations by default on new certificates</label>
-      <h2 style="margin-top:8px">QR code</h2>
+      <h2 style="margin-top:8px">Electronic signatures</h2>
+      <p class="hint" style="margin-top:-6px">Draw a signature on screen, or upload a photo of it signed on plain white paper (the white background is removed automatically). Signatures are printed above the signature lines on every certificate design.</p>
+      <div class="sigrow"><div class="nm2">Authorized signatory<div class="hint" id="sigWho"></div></div>
+        <img id="sigMainPrev" class="sigprev" alt="Authorized signatory's signature" hidden>
+        <div class="actions"><button class="btn sec sm" type="button" data-sig-draw="main">Draw</button>
+          <label class="btn sec sm" style="margin:0">Upload<input type="file" accept="image/*" data-sig-upload="main" hidden></label>
+          <button class="btn sec sm" type="button" data-sig-clear="main">Remove</button></div></div>
+      <div id="insList"></div>
+      <div class="sigrow"><input id="newIns" type="text" maxlength="80" placeholder="Instructor name (exactly as on certificates)" style="flex:1 1 240px" aria-label="New instructor name">
+        <button class="btn sec sm" type="button" id="addIns">Add instructor</button></div>
+      <h2 style="margin-top:18px">QR code</h2>
       <label class="check"><input type="checkbox" id="s_fullid"> Show the full ID / Iqama number inside the QR (otherwise only the last 4 digits)</label>
       <div class="field" style="max-width:420px"><label for="s_valid">Default validity</label><select id="s_valid"><option value="0">No expiry</option><option value="12">1 year</option><option value="24">2 years</option><option value="36">3 years</option></select></div>
       <div class="actions"><button class="btn" type="submit">Save settings</button><span id="setMsg" class="spinner"></span></div>
@@ -268,6 +284,13 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
 </main>
 
 <div id="off" class="offscreen" aria-hidden="true"></div>
+<div id="sigModal" class="modal" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
+  <h2 id="sigTitle">Draw signature</h2>
+  <canvas id="pad" class="sigpad" width="1200" height="400"></canvas>
+  <p class="hint">Sign inside the box with your finger, pen or mouse.</p>
+  <div class="actions"><button class="btn" type="button" id="padSave">Use this signature</button>
+    <button class="btn sec" type="button" id="padClear">Clear</button><button class="btn sec" type="button" id="padCancel">Cancel</button></div>
+</div></div>
 
 <script>/*__LIB_QR__*/</script>
 <script>/*__LIB_H2C__*/</script>
@@ -287,7 +310,8 @@ var COURSES = [
 ];
 var DEFAULTS = { center: "Protocol S for Training and Consultancy", contact: "", sig: "", sigt: "Authorized Representative",
   iosh_t: "IOSH Approved Training Provider", iosh_n: "", iosh_logo: "", osha_t: "OSHA Academy Training Partner", osha_n: "", osha_logo: "",
-  acc_default: false, fullid: false, valid: "24" };
+  acc_default: false, fullid: false, valid: "24", sig_img: "" };
+var INS = [];   // [{id, name, sig}]
 var S = Object.assign({}, DEFAULTS);
 var current = null;          // record being previewed
 var design = "classic";
@@ -364,10 +388,12 @@ function statement(c) {
   return 'conducted by <b>' + esc(S.center) + '</b>, on <b>' + fmt(c.end) + '</b>, with a total duration of <b>' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</b>.';
 }
 function pidLine(c) { return '<div class="pid">ID / Iqama No. <b>' + esc(c.nid) + '</b>' + (c.nationality ? ' · ' + esc(c.nationality) : '') + '</div>'; }
+function insSig(name) { var k = String(name || "").trim().toLowerCase(); var f = INS.find(function (i) { return i.name.trim().toLowerCase() === k; }); return f && f.sig ? f.sig : ""; }
+function sigImg(src) { return src ? '<img src="' + src + '" alt="">' : ''; }
 function sigs(c, mid) {
-  return '<div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
+  return '<div class="sig"><div class="img">' + sigImg(insSig(c.instructor)) + '</div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
     (mid || '') +
-    '<div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>';
+    '<div class="sig"><div class="img">' + sigImg(S.sig_img) + '</div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>';
 }
 function noTxt(c) { return c.no ? esc(c.no) : "Preview – not issued"; }
 
@@ -453,8 +479,8 @@ function modern(c, qr) {
     '<div class="panel"><div class="qr"><img src="' + qr + '" alt=""></div><div class="sc">SCAN TO VERIFY</div>' +
     '<div class="hint2">Any phone camera shows this certificate\'s record. The check code must match.</div>' +
     '<div class="no">' + noTxt(c) + '</div><div class="ck">CHECK ' + esc(c.check) + '</div></div>' +
-    '<div class="bottom"><div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
-    '<div class="sig"><div class="img"></div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>' +
+    '<div class="bottom"><div class="sig"><div class="img">' + sigImg(insSig(c.instructor)) + '</div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
+    '<div class="sig"><div class="img">' + sigImg(S.sig_img) + '</div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>' +
     (accs.length ? '<div class="accs">' + accHTML(accs) + '</div>' : '') + '</div>' +
     '<div class="foot">' + esc(S.center) + (S.contact ? ' · ' + esc(S.contact) : '') + '<span>' + noTxt(c) + '</span></div>' +
     '</div></div>';
@@ -628,6 +654,18 @@ var store = {
   },
   lget: function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
   lset: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  listIns: async function () {
+    if (this.mode === "db") { var q = await this.db.collection("instructors").get(); return q.docs.map(function (d) { return d.data(); }); }
+    return this.lget("ps_instructors", []);
+  },
+  saveIns: async function (rec) {
+    if (this.mode === "db") return this.db.doc("instructors/" + rec.id).set(rec);
+    var l = this.lget("ps_instructors", []).filter(function (x) { return x.id !== rec.id; }); l.push(rec); this.lset("ps_instructors", l);
+  },
+  deleteIns: async function (id) {
+    if (this.mode === "db") return this.db.doc("instructors/" + id).delete();
+    this.lset("ps_instructors", this.lget("ps_instructors", []).filter(function (x) { return x.id !== id; }));
+  },
   getSettings: async function () {
     if (this.mode === "db") { var s = await this.db.doc("config/settings").get(); return s.exists ? s.data() : {}; }
     return this.lget("ps_settings", {});
@@ -801,11 +839,107 @@ $("sf").addEventListener("submit", async function (ev) {
   var v = { center: $("s_center").value.trim() || DEFAULTS.center, contact: $("s_contact").value.trim(), sig: $("s_sig").value.trim(), sigt: $("s_sigt").value.trim(),
     iosh_t: $("s_iosh_t").value.trim(), iosh_n: $("s_iosh_n").value.trim(), osha_t: $("s_osha_t").value.trim(), osha_n: $("s_osha_n").value.trim(),
     acc_default: $("s_acc_def").checked, fullid: $("s_fullid").checked, valid: $("s_valid").value,
-    iosh_logo: S.iosh_logo, osha_logo: S.osha_logo };
+    iosh_logo: S.iosh_logo, osha_logo: S.osha_logo, sig_img: S.sig_img };
   var l1 = await readLogo($("s_iosh_l")), l2 = await readLogo($("s_osha_l"));
   if (l1) v.iosh_logo = l1; if (l2) v.osha_logo = l2;
-  try { await store.saveSettings(v); S = Object.assign({}, DEFAULTS, v); settingsToForm(); $("setMsg").textContent = "Saved."; live(); }
+  try { await store.saveSettings(v); S = Object.assign({}, DEFAULTS, v); settingsToForm(); drawSigUI(); $("setMsg").textContent = "Saved."; live(); }
   catch (e) { $("setMsg").textContent = "Could not save: " + (e.message || e.code || e); }
+});
+
+
+// ---------- electronic signatures ----------
+function trimToPNG(srcCanvas, removeWhite) {
+  var w = srcCanvas.width, h = srcCanvas.height, g = srcCanvas.getContext("2d"), id = g.getImageData(0, 0, w, h), d = id.data;
+  var minX = w, minY = h, maxX = -1, maxY = -1;
+  for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+    var i = (y * w + x) * 4;
+    if (removeWhite) {
+      var lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      if (lum > 185) d[i + 3] = 0;                                   // paper -> transparent
+      else { var a = Math.min(255, Math.round((185 - lum) * 2.2)); d[i] = 14; d[i + 1] = 34; d[i + 2] = 64; d[i + 3] = Math.max(d[i + 3] === 0 ? 0 : a, 0); }
+    }
+    if (d[i + 3] > 20) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  }
+  if (maxX < 0) return "";
+  g.putImageData(id, 0, 0);
+  var pad = 6, cw = maxX - minX + 1 + pad * 2, ch = maxY - minY + 1 + pad * 2;
+  var k = Math.min(1, 900 / cw, 300 / ch), out = document.createElement("canvas");
+  out.width = Math.round(cw * k); out.height = Math.round(ch * k);
+  out.getContext("2d").drawImage(srcCanvas, minX - pad, minY - pad, cw, ch, 0, 0, out.width, out.height);
+  return out.toDataURL("image/png");
+}
+function imageFileToSig(file) {
+  return new Promise(function (res) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        res(trimToPNG(c, true));
+      };
+      im.onerror = function () { res(""); };
+      im.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  });
+}
+var pad = $("pad"), pg = pad.getContext("2d"), drawing = false, inked = false, padTarget = null;
+function padReset() { pg.clearRect(0, 0, pad.width, pad.height); pg.lineWidth = 5; pg.lineCap = "round"; pg.lineJoin = "round"; pg.strokeStyle = "#0E2240"; inked = false; }
+function padPos(e) { var r = pad.getBoundingClientRect(); return { x: (e.clientX - r.left) * pad.width / r.width, y: (e.clientY - r.top) * pad.height / r.height }; }
+pad.addEventListener("pointerdown", function (e) { drawing = true; pad.setPointerCapture(e.pointerId); var p = padPos(e); pg.beginPath(); pg.moveTo(p.x, p.y); pg.lineTo(p.x + 0.1, p.y + 0.1); pg.stroke(); inked = true; e.preventDefault(); });
+pad.addEventListener("pointermove", function (e) { if (!drawing) return; var p = padPos(e); pg.lineTo(p.x, p.y); pg.stroke(); e.preventDefault(); });
+["pointerup", "pointercancel", "pointerleave"].forEach(function (t) { pad.addEventListener(t, function () { drawing = false; }); });
+function openPad(target) { padTarget = target; padReset(); $("sigTitle").textContent = "Draw signature — " + (target === "main" ? (S.sig || "Authorized signatory") : (INS.find(function (i) { return i.id === target; }) || {}).name); $("sigModal").hidden = false; }
+$("padClear").addEventListener("click", padReset);
+$("padCancel").addEventListener("click", function () { $("sigModal").hidden = true; });
+$("padSave").addEventListener("click", async function () {
+  if (!inked) return;
+  var png = trimToPNG(pad, false); $("sigModal").hidden = true;
+  await applySig(padTarget, png);
+});
+async function applySig(target, png) {
+  if (!png) { $("setMsg").textContent = "No signature found in that image. Use a clear photo on white paper."; return; }
+  try {
+    if (target === "main") { S.sig_img = png; await store.saveSettings(stripDefaults(S)); }
+    else { var ins = INS.find(function (i) { return i.id === target; }); ins.sig = png; await store.saveIns(ins); }
+    $("setMsg").textContent = "Signature saved."; drawSigUI(); live(); if (current && current.no) renderPreview();
+  } catch (e) { $("setMsg").textContent = "Could not save the signature: " + (e.message || e.code || e); }
+}
+function stripDefaults(o) { var v = {}; Object.keys(DEFAULTS).forEach(function (k) { v[k] = o[k]; }); return v; }
+function drawSigUI() {
+  $("sigWho").textContent = S.sig ? S.sig + (S.sigt ? " · " + S.sigt : "") : "Set the name above, then add the signature";
+  var mp = $("sigMainPrev"); mp.hidden = !S.sig_img; if (S.sig_img) mp.src = S.sig_img;
+  $("insList").innerHTML = INS.map(function (i) {
+    return '<div class="sigrow"><div class="nm2">' + esc(i.name) + '<div class="hint">Instructor</div></div>' +
+      (i.sig ? '<img class="sigprev" src="' + i.sig + '" alt="Signature of ' + esc(i.name) + '">' : '<span class="hint">No signature yet</span>') +
+      '<div class="actions"><button class="btn sec sm" type="button" data-sig-draw="' + esc(i.id) + '">Draw</button>' +
+      '<label class="btn sec sm" style="margin:0">Upload<input type="file" accept="image/*" data-sig-upload="' + esc(i.id) + '" hidden></label>' +
+      '<button class="btn sec sm" type="button" data-ins-del="' + esc(i.id) + '">Remove</button></div></div>';
+  }).join("");
+  $("insNames").innerHTML = INS.map(function (i) { return '<option value="' + esc(i.name) + '">'; }).join("");
+  insNote();
+}
+function insNote() { var n = $("ins").value.trim(); $("insSigNote").textContent = n ? (insSig(n) ? "✓ Electronic signature on file for this instructor" : "No signature on file for this name — add one in Settings") : ""; }
+$("ins").addEventListener("input", insNote);
+document.addEventListener("click", async function (e) {
+  var d = e.target.closest("[data-sig-draw]"), c = e.target.closest("[data-sig-clear]"), x = e.target.closest("[data-ins-del]");
+  if (d) openPad(d.dataset.sigDraw);
+  if (c) { S.sig_img = ""; await store.saveSettings(stripDefaults(S)); drawSigUI(); live(); }
+  if (x) { await store.deleteIns(x.dataset.insDel); INS = INS.filter(function (i) { return i.id !== x.dataset.insDel; }); drawSigUI(); live(); }
+});
+document.addEventListener("change", async function (e) {
+  var u = e.target.closest("[data-sig-upload]"); if (!u || !u.files || !u.files[0]) return;
+  $("setMsg").textContent = "Processing signature…";
+  var png = await imageFileToSig(u.files[0]); u.value = "";
+  await applySig(u.dataset.sigUpload, png);
+});
+$("addIns").addEventListener("click", async function () {
+  var n = $("newIns").value.trim().replace(/\s+/g, " "); if (!n) return;
+  if (INS.some(function (i) { return i.name.toLowerCase() === n.toLowerCase(); })) { $("setMsg").textContent = "That instructor is already listed."; return; }
+  var rec = { id: "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: n, sig: "" };
+  await store.saveIns(rec); INS.push(rec); $("newIns").value = ""; drawSigUI();
 });
 
 // ---------- tabs ----------
@@ -821,11 +955,13 @@ document.querySelectorAll("[data-tab]").forEach(function (b) { b.addEventListene
 fillCourses();
 $("sd").value = today(); $("cd").value = today();
 settingsToForm();
+drawSigUI();
 renderPreview();
 (async function () {
   await store.init();
   try { S = Object.assign({}, DEFAULTS, await store.getSettings()); } catch (e) {}
-  settingsToForm(); live();
+  try { INS = await store.listIns(); } catch (e) { INS = []; }
+  settingsToForm(); drawSigUI(); live();
 })();
 })();
 </script>
