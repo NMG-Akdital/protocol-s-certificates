@@ -272,6 +272,8 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
         <div class="actions"><button class="btn sec sm" type="button" data-sig-draw="main">Draw</button>
           <label class="btn sec sm" style="margin:0">Upload<input type="file" accept="image/*" data-sig-upload="main" hidden></label>
           <button class="btn sec sm" type="button" data-sig-clear="main">Remove</button></div></div>
+      <div class="sigrow"><div class="nm2">Instructor (default)<div class="hint">Printed for every instructor who has no signature of their own below</div></div>
+        <img class="sigprev" src="__SIG_INS__" alt="Default instructor signature"></div>
       <div id="insList"></div>
       <div class="sigrow"><input id="newIns" type="text" maxlength="80" placeholder="Instructor name (exactly as on certificates)" style="flex:1 1 240px" aria-label="New instructor name">
         <button class="btn sec sm" type="button" id="addIns">Add instructor</button></div>
@@ -299,7 +301,8 @@ td { padding: 9px 10px; border-bottom: 1px solid #EEF0F3; font-size: 14px; verti
 (function () {
 "use strict";
 var IMG = { logo: "__LOGO__", logoWhite: "__LOGO_WHITE__", seal: "__SEAL__", frame: "__FRAME__",
-            ros: "__ROS__", rosWhite: "__ROS_WHITE__", rosGold: "__ROS_GOLD__" };
+            ros: "__ROS__", rosWhite: "__ROS_WHITE__", rosGold: "__ROS_GOLD__",
+            sigMain: "__SIG_MAIN__", sigIns: "__SIG_INS__" };
 var COURSES = [
   ["PS-HSE-001", "Flagman / Banksman Training", 8], ["PS-HSE-002", "First Aid Training", 6],
   ["PS-HSE-003", "Fire Fighting Training", 8], ["PS-HSE-004", "Fire Warden Training", 8],
@@ -388,12 +391,13 @@ function statement(c) {
   return 'conducted by <b>' + esc(S.center) + '</b>, on <b>' + fmt(c.end) + '</b>, with a total duration of <b>' + hoursTxt(c.hours) + ' ' + plural(c.hours) + '</b>.';
 }
 function pidLine(c) { return '<div class="pid">ID / Iqama No. <b>' + esc(c.nid) + '</b>' + (c.nationality ? ' · ' + esc(c.nationality) : '') + '</div>'; }
-function insSig(name) { var k = String(name || "").trim().toLowerCase(); var f = INS.find(function (i) { return i.name.trim().toLowerCase() === k; }); return f && f.sig ? f.sig : ""; }
+function insSig(name) { var k = String(name || "").trim().toLowerCase(); var f = INS.find(function (i) { return i.name.trim().toLowerCase() === k; }); return f && f.sig ? f.sig : IMG.sigIns; }
+function mainSig() { return S.sig_img || IMG.sigMain; }
 function sigImg(src) { return src ? '<img src="' + src + '" alt="">' : ''; }
 function sigs(c, mid) {
   return '<div class="sig"><div class="img">' + sigImg(insSig(c.instructor)) + '</div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
     (mid || '') +
-    '<div class="sig"><div class="img">' + sigImg(S.sig_img) + '</div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>';
+    '<div class="sig"><div class="img">' + sigImg(mainSig()) + '</div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>';
 }
 function noTxt(c) { return c.no ? esc(c.no) : "Preview – not issued"; }
 
@@ -480,7 +484,7 @@ function modern(c, qr) {
     '<div class="hint2">Any phone camera shows this certificate\'s record. The check code must match.</div>' +
     '<div class="no">' + noTxt(c) + '</div><div class="ck">CHECK ' + esc(c.check) + '</div></div>' +
     '<div class="bottom"><div class="sig"><div class="img">' + sigImg(insSig(c.instructor)) + '</div><div class="line"><div class="who">' + esc(c.instructor) + '</div><div class="role">Instructor / Trainer</div></div></div>' +
-    '<div class="sig"><div class="img">' + sigImg(S.sig_img) + '</div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>' +
+    '<div class="sig"><div class="img">' + sigImg(mainSig()) + '</div><div class="line"><div class="who">' + esc(S.sig) + '</div><div class="role">' + esc(S.sigt || "Authorized Representative") + '</div></div></div>' +
     (accs.length ? '<div class="accs">' + accHTML(accs) + '</div>' : '') + '</div>' +
     '<div class="foot">' + esc(S.center) + (S.contact ? ' · ' + esc(S.contact) : '') + '<span>' + noTxt(c) + '</span></div>' +
     '</div></div>';
@@ -910,7 +914,7 @@ async function applySig(target, png) {
 function stripDefaults(o) { var v = {}; Object.keys(DEFAULTS).forEach(function (k) { v[k] = o[k]; }); return v; }
 function drawSigUI() {
   $("sigWho").textContent = S.sig ? S.sig + (S.sigt ? " · " + S.sigt : "") : "Set the name above, then add the signature";
-  var mp = $("sigMainPrev"); mp.hidden = !S.sig_img; if (S.sig_img) mp.src = S.sig_img;
+  var mp = $("sigMainPrev"); mp.hidden = false; mp.src = mainSig();
   $("insList").innerHTML = INS.map(function (i) {
     return '<div class="sigrow"><div class="nm2">' + esc(i.name) + '<div class="hint">Instructor</div></div>' +
       (i.sig ? '<img class="sigprev" src="' + i.sig + '" alt="Signature of ' + esc(i.name) + '">' : '<span class="hint">No signature yet</span>') +
@@ -921,7 +925,7 @@ function drawSigUI() {
   $("insNames").innerHTML = INS.map(function (i) { return '<option value="' + esc(i.name) + '">'; }).join("");
   insNote();
 }
-function insNote() { var n = $("ins").value.trim(); $("insSigNote").textContent = n ? (insSig(n) ? "✓ Electronic signature on file for this instructor" : "No signature on file for this name — add one in Settings") : ""; }
+function insNote() { var n = $("ins").value.trim(); $("insSigNote").textContent = n ? "✓ Electronic signature will be printed" : ""; }
 $("ins").addEventListener("input", insNote);
 document.addEventListener("click", async function (e) {
   var d = e.target.closest("[data-sig-draw]"), c = e.target.closest("[data-sig-clear]"), x = e.target.closest("[data-ins-del]");

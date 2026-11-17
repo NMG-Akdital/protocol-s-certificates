@@ -109,7 +109,8 @@ def main():
             "__LOGO__": b64("/tmp/logo.png", "image/png"),
             "__SEAL__": b64("/tmp/seal-sm.png", "image/png"), "__FRAME__": b64("/tmp/frame.png", "image/png"),
             "__ROS_WHITE__": b64("/tmp/rosette-white.png", "image/png"), "__ROS_GOLD__": b64("/tmp/rosette-gold.png", "image/png"),
-            "__ROS__": b64("/tmp/rosette.png", "image/png")}
+            "__ROS__": b64("/tmp/rosette.png", "image/png"),
+            "__SIG_MAIN__": b64("/tmp/sig-authorized.png", "image/png"), "__SIG_INS__": b64("/tmp/sig-instructor.png", "image/png")}
     for k in sorted(imgs, key=len, reverse=True):
         html = html.replace(k, imgs[k])
     libs = {"/*__LIB_QR__*/": LIBS / "qrcode-generator-2.0.4/package/dist/qrcode.js",
